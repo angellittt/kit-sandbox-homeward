@@ -1,4 +1,5 @@
 {
+  "designSystem": "https://claude.ai/artifact/84WiUVMfsipcsUEcWha35d",
   "tracker": "https://app.clickup.com/8593845/v/l/li/901115555981",
   "schema": "ttt-ds/1",
   "profile": "shadcn",
@@ -7,7 +8,7 @@
   "tokensIn": ".ttt/tokens.json",
   "systemIn": ".ttt/system.md",
   "tokensOut": "src/styles/ds-tokens.css",
-  "lastSynced": "2026-10-14T17:41:06Z",
+  "lastSynced": "2026-10-14T18:39:30Z",
   "typeClassPrefix": "type-",
   "namespace": "Homeward",
   "bundleExtras": {
@@ -35,6 +36,5 @@
   },
   "usingInCode": {
     "notes": []
-  },
-  "setup": "awaiting-design"
+  }
 }
