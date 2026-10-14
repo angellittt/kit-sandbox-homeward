@@ -19,7 +19,7 @@ How Homeward is set up. The rules every TTT design system follows live in the ki
 
 **Provisional** — inputs still standing in for the client's own, one line each, with where they came from; `/ds-sync restyle` replaces them.
 
-- `fonts` — mono only: kit default (system stack); display Fredoka and sans Inter are decided
+- `fonts` — mono only: kit default (system stack); display Nunito and sans Inter are decided
 - `logo` — kit default (none; the cover shows the name)
 
 **Open deviations** — none.

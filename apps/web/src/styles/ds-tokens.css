@@ -2,7 +2,7 @@
  * Source: Homeward tokens.json v1
  * Design system: https://claude.ai/artifact/84WiUVMfsipcsUEcWha35d
  * Schema ttt-ds/1 · profile shadcn
- * Snapshot synced: 2026-10-14T19:06:44Z
+ * Snapshot synced: 2026-10-14T20:00:56Z
  *
  * Regenerate with: node scripts/ds-tokens.mjs
  */
@@ -131,7 +131,7 @@
 /* Fallback stacks. The --font-* variables themselves come from the
  * framework's font loader; these sit behind them. */
 :root {
-  --font-fallback-display: "Fredoka", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-fallback-display: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-fallback-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-fallback-mono: ui-monospace, Menlo, Consolas, monospace;
 }
