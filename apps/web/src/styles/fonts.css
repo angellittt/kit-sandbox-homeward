@@ -26,7 +26,7 @@
 /* A family with a package, e.g.:
 @import "@fontsource-variable/{{PACKAGE}}";
 */
-@import "@fontsource-variable/fredoka";
+@import "@fontsource-variable/nunito";
 @import "@fontsource-variable/inter";
 
 /* A family without one — one per font file, e.g.:
@@ -43,6 +43,6 @@
   /* Only the families that load a face, e.g.:
   --font-sans: "{{SANS_FAMILY}}";
   */
-  --font-display: "Fredoka Variable";
+  --font-display: "Nunito Variable";
   --font-sans: "Inter Variable";
 }
