@@ -1,9 +1,10 @@
-// design-system-kit 0.16.0 · profile shadcn · stock component (base-nova + baseline only)
+// design-system-kit 0.16.2 · profile shadcn · stock component (base-nova + baseline only)
 /**
  * Stock base-nova (shadcn 4.21.1, 2026-10-07) + TTT baseline:
  * - Focus: removed `outline-none` and `focus-visible:border-ring/ring-*` (base and destructive) in favour of the global `:focus-visible` outline.
  * - Radius roles (D1): base `rounded-lg` -> `rounded-md`; xs/sm/icon-xs/icon-sm `rounded-[min(var(--radius-md),…)]` -> `rounded-sm`; button-group override `rounded-lg` -> `rounded-md`.
  * - `link` variant `text-primary` -> `text-primary-text` (text-safe primary).
+ * - Hovers wired to their tokens: default `hover:bg-primary/80` -> `hover:bg-primary-strong` (the hover Setup picks so on-primary keeps contrast); secondary `hover:bg-[color-mix(…secondary…foreground_5%)]` -> `hover:bg-fill-strong` (the hover for fill-normal).
  */
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -14,11 +15,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        default: "bg-primary text-primary-foreground hover:bg-primary-strong",
         outline:
           "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "bg-secondary text-secondary-foreground hover:bg-fill-strong aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
         destructive:

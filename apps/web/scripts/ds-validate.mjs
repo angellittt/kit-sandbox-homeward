@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// design-system-kit 0.16.0 · profile shadcn · kit file — fix it in the kit, not per client
+// design-system-kit 0.16.2 · profile shadcn · kit file — fix it in the kit, not per client
 /**
  * ds-validate.mjs — the contract's config validation.
  *
@@ -40,7 +40,7 @@ import { join, resolve, dirname, relative } from "node:path"
 import { fileURLToPath } from "node:url"
 
 /** The kit these scripts belong to. A repo may not claim a newer one. */
-export const KIT_VERSION = "0.16.0"
+export const KIT_VERSION = "0.16.2"
 const SCHEMA = "ttt-ds/1"
 const PROFILE = "shadcn"
 
@@ -266,9 +266,13 @@ export function validate(repo, { preflight = false, testedRange, system, tokens:
   // ---- config --------------------------------------------------------------
   const configPath = join(repo, ".ttt/design-system.json")
   if (!existsSync(configPath)) {
-    err(".ttt/design-system.json", "not found", "this repo isn't connected to a design system; Setup writes it")
-    // Setup's pre-flight runs before the config exists: the lockfile check still applies.
-    if (preflight) checkTestedRange(repo, testedRange, err)
+    // Setup's pre-flight runs before the config exists, so there a missing config
+    // is expected (a note), and the lockfile check still applies.
+    if (!preflight) err(".ttt/design-system.json", "not found", "this repo isn't connected to a design system; Setup writes it")
+    else {
+      notes.push(".ttt/design-system.json not written yet — expected before Setup's code step")
+      checkTestedRange(repo, testedRange, err, undefined, warn, notes)
+    }
     return { errors, warnings, notes }
   }
   let config
@@ -347,7 +351,7 @@ export function validate(repo, { preflight = false, testedRange, system, tokens:
   }
 
   // ---- pre-flight: installed versions vs the tested range --------------------------
-  if (preflight) checkTestedRange(repo, testedRange, err, config.framework ?? "next")
+  if (preflight) checkTestedRange(repo, testedRange, err, config.framework ?? "next", warn, notes)
 
   return { errors, warnings, notes }
 }
@@ -578,7 +582,13 @@ export function detectFramework(app) {
   return found.length === 1 ? found[0] : null
 }
 
-function checkTestedRange(repo, testedRange, err, framework) {
+/**
+ * Installed versions against the tested range. A different major than the range
+ * is an error (Setup reports the repo blocked). The same major outside the range
+ * is a warning: flag it for the dev. A newer patch of the tested maximum's minor
+ * (7.3.6 against 7.3.1) is a note: patch releases don't change what was tested.
+ */
+function checkTestedRange(repo, testedRange, err, framework, warn = err, notes = []) {
   const rangePath = testedRange ?? join(HERE, "tested-range.json")
   if (!existsSync(rangePath)) { err("tested-range.json", "not found next to the scripts", "copy it from the kit with the scripts"); return }
   const range = JSON.parse(readFileSync(rangePath, "utf8"))
@@ -598,8 +608,14 @@ function checkTestedRange(repo, testedRange, err, framework) {
       if (required) err(`package ${name}`, "isn't installed", `install ${name}@${max}`)
       continue
     }
-    if (compareVersions(v, min) < 0 || compareVersions(v, max) > 0)
-      err(`package ${name}`, `is ${v}, outside the tested range ${min} – ${max}`, "flag it for the dev; Setup never upgrades or downgrades an existing package")
+    if (compareVersions(v, min) >= 0 && compareVersions(v, max) <= 0) continue
+    const [vMaj, vMin] = v.split(".").map(Number), [maxMaj, maxMin] = max.split(".").map(Number), [minMaj] = min.split(".").map(Number)
+    if (vMaj !== minMaj && vMaj !== maxMaj)
+      err(`package ${name}`, `is ${v}, a different major from the tested range ${min} – ${max}`, "Setup can't run on it: move it into the tested major, or widen the range with an acceptance run")
+    else if (vMaj === maxMaj && vMin === maxMin && compareVersions(v, max) > 0)
+      notes.push(`package ${name} is ${v}, a newer patch than the tested ${max} — not flagged`)
+    else
+      warn(`package ${name}`, `is ${v}, outside the tested range ${min} – ${max}`, "flag it for the dev; Setup never upgrades or downgrades an existing package")
   }
 }
 
