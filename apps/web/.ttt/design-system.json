@@ -8,7 +8,7 @@
   "tokensIn": ".ttt/tokens.json",
   "systemIn": ".ttt/system.md",
   "tokensOut": "src/styles/ds-tokens.css",
-  "lastSynced": "2026-10-14T18:39:30Z",
+  "lastSynced": "2026-10-14T19:06:44Z",
   "typeClassPrefix": "type-",
   "namespace": "Homeward",
   "bundleExtras": {
