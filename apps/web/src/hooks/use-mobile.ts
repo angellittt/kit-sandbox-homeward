@@ -1,4 +1,4 @@
-// design-system-kit 0.16.2 · profile shadcn · stock component (base-nova + baseline only)
+// design-system-kit 0.16.6 · profile shadcn · stock component (base-nova + baseline only)
 import * as React from "react";
 
 const MOBILE_BREAKPOINT = 768;
