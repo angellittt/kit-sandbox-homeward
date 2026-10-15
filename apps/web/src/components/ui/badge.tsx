@@ -1,7 +1,8 @@
-// design-system-kit 0.16.0 · profile shadcn · kit extension (replaces the stock file)
+// design-system-kit 0.16.2 · profile shadcn · kit extension (replaces the stock file)
 /**
  * Stock base-nova (shadcn 4.21.1, 2026-10-07) + TTT baseline:
  * - Badge: focus ring utilities (incl. destructive's focus ring tint) removed in favour of the global :focus-visible rule.
+ * - Badge: a link badge's hover `[a]:hover:bg-primary/80` -> `[a]:hover:bg-primary-strong` (the hover for primary-normal, as Button's).
  * + TTT kit extensions:
  * - tone neutral | primary | secondary | accent | positive | cautionary | negative (Semantic colour): sets --t-soft/--t-text/--t-solid/--t-on; data-tone.
  * - variant gains soft | solid, which read the tone's --t-* values. A tone with no variant renders soft; stock variants are unchanged and ignore tone.
@@ -17,7 +18,8 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
+        default:
+          "bg-primary text-primary-foreground [a]:hover:bg-primary-strong",
         secondary:
           "bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80",
         destructive:

@@ -1,8 +1,8 @@
-// design-system-kit 0.16.0 · profile shadcn · stock component (base-nova + baseline only)
+// design-system-kit 0.16.2 · profile shadcn · stock component (base-nova + baseline only)
 /**
  * Stock base-nova (shadcn 4.21.1, 2026-10-07) + TTT baseline:
  * - Control gets `data-slot="slider-control"`.
- * - Thumb `bg-white` -> `bg-background`.
+ * - Thumb `bg-white` -> `bg-thumb-normal` (the thumb token: light in every theme, as stock's white is).
  * - Focus: thumb `focus-visible:ring-3 focus-visible:outline-hidden` -> `has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring` (keyboard focus lands on the thumb's visually hidden range input, so the global rule alone draws nothing visible).
  */
 import { Slider as SliderPrimitive } from "@base-ui/react/slider";
@@ -50,7 +50,7 @@ function Slider({
           <SliderPrimitive.Thumb
             data-slot="slider-thumb"
             key={index}
-            className="relative block size-3 shrink-0 rounded-full border border-ring bg-background ring-ring/50 transition-[color,box-shadow] select-none after:absolute after:-inset-2 hover:ring-3 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring active:ring-3 disabled:pointer-events-none disabled:opacity-50"
+            className="relative block size-3 shrink-0 rounded-full border border-ring bg-thumb-normal ring-ring/50 transition-[color,box-shadow] select-none after:absolute after:-inset-2 hover:ring-3 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring active:ring-3 disabled:pointer-events-none disabled:opacity-50"
           />
         ))}
       </SliderPrimitive.Control>

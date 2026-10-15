@@ -1,7 +1,8 @@
-// design-system-kit 0.16.0 · profile shadcn · stock component (base-nova + baseline only)
+// design-system-kit 0.16.2 · profile shadcn · stock component (base-nova + baseline only)
 /**
  * Stock base-nova (shadcn 4.21.1, 2026-10-07) + TTT baseline:
  * - Focus: removed `outline-none`, `focus-visible:border-ring/ring-*` and the `group-has-[:focus-visible]/field-label:*` overrides in favour of the global `:focus-visible` outline.
+ * - Thumb wired to its token: `bg-background` (with `dark:data-checked:bg-primary-foreground` and `dark:data-unchecked:bg-foreground`) -> `bg-thumb-normal`, light in every theme.
  */
 "use client";
 
@@ -27,7 +28,7 @@ function Switch({
     >
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
-        className="pointer-events-none block rounded-full bg-background ring-0 transition-transform group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)] dark:data-checked:bg-primary-foreground group-data-[size=default]/switch:data-unchecked:translate-x-0 group-data-[size=sm]/switch:data-unchecked:translate-x-0 dark:data-unchecked:bg-foreground"
+        className="pointer-events-none block rounded-full bg-thumb-normal ring-0 transition-transform group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=default]/switch:data-unchecked:translate-x-0 group-data-[size=sm]/switch:data-unchecked:translate-x-0"
       />
     </SwitchPrimitive.Root>
   );
