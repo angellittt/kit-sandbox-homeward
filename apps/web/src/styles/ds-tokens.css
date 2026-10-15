@@ -2,7 +2,7 @@
  * Source: Homeward tokens.json v1
  * Design system: https://claude.ai/artifact/84WiUVMfsipcsUEcWha35d
  * Schema ttt-ds/1 · profile shadcn
- * Snapshot synced: 2026-10-14T20:00:56Z
+ * Snapshot synced: 2026-10-15T01:06:37Z
  *
  * Regenerate with: node scripts/ds-tokens.mjs
  */
@@ -10,36 +10,36 @@
 /* Primitive ramps. Never mapped to a utility and never referenced by
  * components — the semantic layer below aliases them. */
 :root {
-  --brand-primary-10: #001919;
-  --brand-primary-20: #003a3a;
-  --brand-primary-30: #005d5d;
-  --brand-primary-40: #007f7f;
-  --brand-primary-50: #0fa3a3;
-  --brand-primary-60: #5ab4b3;
-  --brand-primary-70: #89c6c5;
-  --brand-primary-80: #b4d8d7;
-  --brand-primary-90: #d8e9e8;
-  --brand-primary-95: #ebf3f2;
-  --brand-secondary-10: #142a42;
-  --brand-secondary-20: #224a75;
-  --brand-secondary-30: #3068a5;
-  --brand-secondary-40: #3d88d7;
-  --brand-secondary-50: #4da3ff;
-  --brand-secondary-60: #73b5ff;
-  --brand-secondary-70: #98c8ff;
-  --brand-secondary-80: #bddcff;
-  --brand-secondary-90: #e0eeff;
-  --brand-secondary-95: #f2f8ff;
-  --brand-accent-10: #3c2700;
-  --brand-accent-20: #6b4900;
-  --brand-accent-30: #9a6a00;
-  --brand-accent-40: #ca8d00;
-  --brand-accent-50: #f2a900;
-  --brand-accent-60: #ffb627;
-  --brand-accent-70: #ffca75;
-  --brand-accent-80: #ffddaa;
-  --brand-accent-90: #ffeed6;
-  --brand-accent-95: #fff7ec;
+  --brand-primary-10: #2a0605;
+  --brand-primary-20: #5c1816;
+  --brand-primary-30: #8f2c28;
+  --brand-primary-40: #c23f3a;
+  --brand-primary-50: #f25c54;
+  --brand-primary-60: #f68076;
+  --brand-primary-70: #f9a298;
+  --brand-primary-80: #fac3bc;
+  --brand-primary-90: #fadedb;
+  --brand-primary-95: #faeeec;
+  --brand-secondary-10: #3a2314;
+  --brand-secondary-20: #6c4228;
+  --brand-secondary-30: #9c613c;
+  --brand-secondary-40: #ce8050;
+  --brand-secondary-50: #f79d65;
+  --brand-secondary-60: #fcae7f;
+  --brand-secondary-70: #ffc29e;
+  --brand-secondary-80: #ffd7c0;
+  --brand-secondary-90: #ffebdf;
+  --brand-secondary-95: #fff5f0;
+  --brand-accent-10: #3c2710;
+  --brand-accent-20: #6b471e;
+  --brand-accent-30: #99672d;
+  --brand-accent-40: #c9873c;
+  --brand-accent-50: #f0a34c;
+  --brand-accent-60: #f7b267;
+  --brand-accent-70: #fcc58c;
+  --brand-accent-80: #ffdab4;
+  --brand-accent-90: #ffeddb;
+  --brand-accent-95: #fff7ef;
   --positive-10: #0e2f1c;
   --positive-20: #195733;
   --positive-30: #257e4a;
