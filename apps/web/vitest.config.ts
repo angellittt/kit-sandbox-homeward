@@ -1,6 +1,6 @@
 import { fileURLToPath } from "node:url";
 import { uiConfig } from "@repo/vitest-config/ui";
-import { mergeConfig } from "vitest/config";
+import { coverageConfigDefaults, mergeConfig } from "vitest/config";
 import tsconfigPaths from "vite-tsconfig-paths";
 import svgr from "vite-plugin-svgr";
 
@@ -14,5 +14,7 @@ export default mergeConfig(uiConfig, {
     environment: "jsdom",
     setupFiles: "./src/tests/setup.ts",
     exclude: ["dist", "node_modules"],
+    // The drift test pulls the kit's ds-validate.mjs into the app's coverage.
+    coverage: { exclude: [...coverageConfigDefaults.exclude, "scripts/**"] },
   },
 });

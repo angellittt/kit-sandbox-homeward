@@ -1,4 +1,4 @@
-// design-system-kit 0.16.6 · profile shadcn · kit extension (replaces the stock file)
+// design-system-kit 0.23.1 · profile shadcn · kit extension (replaces the stock file)
 /**
  * Stock base-nova (shadcn 4.21.1, 2026-10-07) + TTT baseline:
  * - Badge: focus ring utilities (incl. destructive's focus ring tint) removed in favour of the global :focus-visible rule.

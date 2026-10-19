@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// design-system-kit 0.16.6 · profile shadcn · kit file — fix it in the kit, not per client
+// design-system-kit 0.23.1 · profile shadcn · kit file — fix it in the kit, not per client
 /**
  * ds-validate.mjs — the contract's config validation.
  *
@@ -25,7 +25,9 @@
  * token snapshot it points at (name grammar, aliases, cycles, colour formats,
  * the semantic tokens the profile's mapping needs, primitive ramps named by
  * role, never by hue), that the theme block's
- * `@source` resolves to the source root, and that the repo's `kitVersion` is
+ * `@source` resolves to the source root, that the global CSS has no style rule
+ * outside a cascade layer (it would beat every Tailwind utility; read with
+ * PostCSS, a dev dependency Setup adds), and that the repo's `kitVersion` is
  * no newer than these scripts. The app's locale module (`<aliases.lib>/locale.ts`)
  * isn't checked: since kit 0.13.0 it is plain app code, not part of the
  * design system. Every error names the field and says how to
@@ -38,9 +40,10 @@
 import { readFileSync, existsSync } from "node:fs"
 import { join, resolve, dirname, relative } from "node:path"
 import { fileURLToPath } from "node:url"
+import { createRequire } from "node:module"
 
 /** The kit these scripts belong to. A repo may not claim a newer one. */
-export const KIT_VERSION = "0.16.6"
+export const KIT_VERSION = "0.23.1"
 const SCHEMA = "ttt-ds/1"
 const PROFILE = "shadcn"
 
@@ -173,7 +176,7 @@ const HUE_WORDS = new Set(("red orange amber yellow lime green emerald teal cyan
 /** "data-50" → "data"; "neutral-0" → "neutral"; a primitive with no step is its own ramp. */
 export const rampOf = (name) => name.replace(/-\d+(\.\d+)?$/, "")
 /** A primitive is a colour token whose usage text starts with "Primitive" (contract, Token tiers). */
-const isPrimitive = (t) => /^Primitive/.test(t?.usage ?? "")
+const isPrimitive = (t) => (t?.usage ?? "").startsWith("Primitive")
 /** The hue word in a ramp name, if any. */
 export const hueIn = (ramp) => ramp.split(/[-_.]/).find((w) => HUE_WORDS.has(w.toLowerCase())) ?? null
 
@@ -208,12 +211,12 @@ const CONFIG_SCHEMA = {
   framework: { required: false, check: (v) => v in FRAMEWORKS ? null : `one of ${Object.keys(FRAMEWORKS).map((f) => `"${f}"`).join(", ")}; leave it out for "next"` },
   contrast: { required: false, check: (v) => isObject(v) ? null : 'an object: { "intentional": [{ "foreground", "background"?, "reason" }] }' },
   usingInCode: { required: false, check: (v) => isObject(v) ? null : 'an object: { "notes": ["…"] }' },
-  // Split Setup: the dev phase has built the branch and the design phase hasn't
+  // Split Setup: the start phase has built the branch and the design phase hasn't
   // created the design system yet. Finish removes it with the link in place.
   setup: { required: false, check: (v) => v === AWAITING_DESIGN ? null : `"${AWAITING_DESIGN}" while Setup waits on its design phase; /ds-setup finish removes it` },
 }
 
-/** The config's `setup` value between Setup's dev phase and its finish. */
+/** The config's `setup` value between Setup's start phase and its finish. */
 export const AWAITING_DESIGN = "awaiting-design"
 
 // ---------------------------------------------------------------------------
@@ -311,14 +314,14 @@ export function validate(repo, { preflight = false, testedRange, system, tokens:
     const p = join(repo, config.systemIn)
     if (existsSync(p)) system = p
     else if (awaitingDesign) notes.push(`${config.systemIn} not written yet — /ds-setup finish snapshots it`)
-    else warn("systemIn", `points at ${config.systemIn}, which doesn't exist`, "run Sync's pull to write the snapshot (Setup writes the first one)")
+    else warn("systemIn", `points at ${config.systemIn}, which doesn't exist`, "run /ds-apply tokens to write the snapshot (Setup writes the first one)")
   }
 
   // ---- token snapshot ----------------------------------------------------------
   if (tokensOverride || typeof config.tokensIn === "string") {
     const tokensPath = tokensOverride ?? join(repo, config.tokensIn)
     const tokensName = tokensOverride ? relative(repo, tokensOverride) : config.tokensIn
-    if (!existsSync(tokensPath)) err(tokensOverride ? "--tokens" : "tokensIn", `points at ${tokensName}, which doesn't exist`, tokensOverride ? "check the path" : "run Sync's pull to write the snapshot")
+    if (!existsSync(tokensPath)) err(tokensOverride ? "--tokens" : "tokensIn", `points at ${tokensName}, which doesn't exist`, tokensOverride ? "check the path" : "run /ds-apply tokens to write the snapshot")
     else {
       let tokens
       try { tokens = JSON.parse(readFileSync(tokensPath, "utf8")) }
@@ -339,6 +342,9 @@ export function validate(repo, { preflight = false, testedRange, system, tokens:
 
   // ---- wiring: @source resolves to the source root -------------------------------
   checkSource(repo, err, warn)
+
+  // ---- wiring: no global CSS outside a layer -------------------------------------
+  checkLayers(repo, err)
 
   // ---- componentFiles name real files --------------------------------------------
   const ui = uiDir(repo)
@@ -533,6 +539,72 @@ function checkSource(repo, err, warn) {
   if (!hits.length) {
     err(`${cssRel} › @source`, `resolves to ${sources.map((s) => relative(repo, resolve(dirname(cssPath), s)) || ".").join(", ")}, not the source root ${relative(repo, root) || "."}`, `set it to "${want.endsWith("/") ? want : want + "/"}" (relative to ${cssRel})`)
   }
+}
+
+/**
+ * What may stay at the top level of the global CSS. Tailwind v4 puts its
+ * utilities in `@layer utilities`, and an unlayered style rule beats every
+ * layered one whatever its specificity, so a reset left at the top level
+ * (`*:not(dialog) { margin: 0 }`, `button { font: inherit }`) silently wins
+ * over `mx-2` and `text-sm`. Everything else — a style rule, or an `@media` /
+ * `@supports` block holding one — goes in `@layer base`, in its order. The
+ * at-rules below configure Tailwind or don't compete with utilities. The
+ * kit's own unlayered CSS (the fonts file's `:root`, the token file) comes in
+ * through `@import`, which this doesn't follow.
+ */
+export const TOP_LEVEL_AT_RULES = new Set([
+  "charset", "import", "layer", "theme", "source", "custom-variant", "variant", "utility",
+  "plugin", "config", "font-face", "keyframes", "property",
+])
+
+/** PostCSS as the app has it, or as the script's own folder reaches it (the kit's CI). */
+export function loadPostcss(repo) {
+  for (const from of [import.meta.url, join(repo, "package.json")]) {
+    try { return createRequire(from)("postcss") } catch { /* not reachable from here: try the next folder */ }
+  }
+  return null
+}
+
+/**
+ * The global CSS's style rules outside any layer, in order: `{ selector, line }`,
+ * where an `@media` / `@supports` (or other) block holding style rules reads as
+ * `@media (…) { html }`. Comments and the allowed at-rules are skipped.
+ */
+export function unlayeredRules(css, postcss) {
+  const root = postcss.parse(css)
+  const found = []
+  for (const node of root.nodes) {
+    if (node.type === "rule") found.push({ selector: node.selector.replace(/\s+/g, " "), line: node.source?.start?.line })
+    else if (node.type === "atrule" && !TOP_LEVEL_AT_RULES.has(node.name.toLowerCase())) {
+      // Style rules inside the block, unless a nested @layer already holds them.
+      const inner = []
+      const walk = (n) => n.each?.((c) => {
+        if (c.type === "rule") inner.push(c.selector.replace(/\s+/g, " "))
+        else if (c.type === "atrule" && c.name.toLowerCase() !== "layer") walk(c)
+      })
+      walk(node)
+      inner.splice(3)
+      if (inner.length) found.push({ selector: `@${node.name} ${node.params} { ${inner.join("; ")} }`.replace(/\s+/g, " "), line: node.source?.start?.line })
+    }
+  }
+  return found
+}
+
+function checkLayers(repo, err) {
+  const cj = join(repo, "components.json")
+  if (!existsSync(cj)) return // checkSource reported it
+  const cssRel = readJsonc(cj).tailwind?.css
+  if (!cssRel || !existsSync(join(repo, cssRel))) return
+  const postcss = loadPostcss(repo)
+  if (!postcss) {
+    err("package postcss", "isn't installed, so the global CSS's layers can't be checked", "install it as a dev dependency (`pnpm add -D postcss@8.5.28`, or the repo's package manager) — Setup and the kit 0.21.0 upgrade add it")
+    return
+  }
+  let rules
+  try { rules = unlayeredRules(readFileSync(join(repo, cssRel), "utf8"), postcss) }
+  catch (e) { err(cssRel, `can't be parsed (${e.reason ?? e.message})`, "fix the syntax"); return }
+  for (const { selector, line } of rules)
+    err(`${cssRel}${line ? `:${line}` : ""} › ${selector}`, "is unlayered and beats every utility (Tailwind v4)", "move it into `@layer base { … }`, keeping its place in the order; change no selector or declaration")
 }
 
 /**

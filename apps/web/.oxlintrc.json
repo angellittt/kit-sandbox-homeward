@@ -16,7 +16,7 @@
       "files": ["src/lib/axios.ts", "src/lib/__tests__/axios.test.ts"],
       "rules": { "repo/no-direct-axios": "off" }
     },
-    // design-system-kit 0.16.0: vendored components, kit scripts
+    // design-system-kit 0.23.1: vendored components, kit scripts
     {
       "files": [
         "src/components/ui/**",

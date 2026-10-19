@@ -1,8 +1,8 @@
 import reactEslintConfig from "@repo/eslint-config/eslint.react.config";
 import { disableRulesCoveredByOxlint } from "@repo/eslint-config/oxlint";
 import { defineConfig } from "eslint/config";
-// design-system-kit 0.16.0 · profile shadcn · wiring (Vite): ESLint
-import type { Linter } from "eslint";
+// design-system-kit 0.23.1 · profile shadcn · wiring (Vite): ESLint, for a TypeScript config
+import type { ESLint, Linter, Rule } from "eslint";
 import { builtinRules } from "eslint/use-at-your-own-risk";
 
 // ---- design-system-kit (vendored files keep stock shadcn's style) ----------
@@ -59,8 +59,140 @@ const dsStyleRulesOff = (entries: Linter.Config[]): Linter.Config => {
   };
 };
 
+// ---- design-system-kit: tokens only -----------------------------------------
+// App code styles with the design system's tokens: the Tailwind names in its
+// "Using in code". A raw colour (`bg-[#1a2b3c]`, `text-[oklch(…)]`, a "#fff"
+// string) is an error; an arbitrary size or space (`p-[18px]`, `text-[13px]`,
+// `rounded-[10px]`) is a warning, since layout sometimes needs one. A value the
+// tokens keep missing is a token request to design, not an override. An
+// exception is an eslint-disable comment that says why. Vendored components
+// keep stock's own fixed sizes, so they're left out.
+const DS_COLOUR_FN = /^(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\(/i;
+// A whole string that is one colour ("#fff", "rgb(0 0 0)"). Simple patterns and a
+// scan rather than one nested regex, so a repo's security rules (detect-unsafe-regex)
+// don't flag the block.
+const DS_HEX = /^#[0-9a-f]{3,8}$/i;
+const DS_COLOUR_LITERAL_FN = /^(?:rgba?|hsla?|oklch|oklab|lab|lch)\(/i;
+const dsIsColourLiteral = (text: string): boolean => {
+  const t = text.trim();
+  return (
+    DS_HEX.test(t) ||
+    (DS_COLOUR_LITERAL_FN.test(t) && t.indexOf(")") === t.length - 1)
+  );
+};
+const DS_SIZED = new Set(
+  "p px py pt pr pb pl ps pe m mx my mt mr mb ml ms me gap gap-x gap-y space-x space-y w h size min-w min-h max-w max-h inset inset-x inset-y top right bottom left rounded text leading tracking translate-x translate-y".split(
+    " ",
+  ),
+);
+/** A utility that sets a size or a space: `p`, `-mt`, `rounded-tl`, `text`. */
+const dsIsSized = (utility: string): boolean => {
+  const u = utility.startsWith("-") ? utility.slice(1) : utility;
+  return DS_SIZED.has(u) || /^rounded-[a-z]+$/.test(u);
+};
+
+/** The arbitrary value of each utility in a class string: `hover:p-[18px]` → ["p", "18px"]. */
+const dsArbitrary = (text: string): [string, string, string][] =>
+  text.split(/\s+/).flatMap((cls) => {
+    // The utility starts after the last variant colon outside brackets (`[&:hover]:` is one variant).
+    let depth = 0;
+    let start = 0;
+    for (let i = 0; i < cls.length; i++) {
+      const ch = cls.charAt(i);
+      if (ch === "[") depth++;
+      else if (ch === "]") depth--;
+      else if (ch === ":" && depth === 0) start = i + 1;
+    }
+    const m = /^!?(-?[a-z][\w-]*?)-\[([^\]]+)\]!?$/.exec(cls.slice(start));
+    return m ? [[cls, m[1], m[2]] as [string, string, string]] : [];
+  });
+
+const dsStringRule = (
+  meta: Rule.RuleMetaData,
+  check: (text: string) => string[],
+): Rule.RuleModule => ({
+  meta: { ...meta, schema: [] },
+  create: (context) => {
+    const visit = (node: Rule.Node, text: string) => {
+      for (const message of check(text)) context.report({ node, message });
+    };
+    return {
+      Literal: (node) => {
+        if (typeof node.value === "string") visit(node, node.value);
+      },
+      TemplateElement: (node) =>
+        visit(node, node.value.cooked ?? node.value.raw),
+    };
+  },
+});
+
+const dsTokensPlugin: ESLint.Plugin = {
+  rules: {
+    "no-raw-colour": dsStringRule(
+      {
+        type: "problem",
+        docs: { description: "Colours come from the design system's tokens" },
+      },
+      (text) => [
+        ...dsArbitrary(text)
+          .filter(
+            ([, , value]) => value.startsWith("#") || DS_COLOUR_FN.test(value),
+          )
+          .map(
+            ([cls]) =>
+              `\`${cls}\` is a raw colour: use a token's Tailwind name ("Using in code"). A colour the tokens don't have is a token request to design.`,
+          ),
+        ...(dsIsColourLiteral(text)
+          ? [
+              `"${text.trim()}" is a raw colour: use a token (var(--<token>) or its Tailwind name). A colour the tokens don't have is a token request to design.`,
+            ]
+          : []),
+      ],
+    ),
+    "no-arbitrary-size": dsStringRule(
+      {
+        type: "suggestion",
+        docs: { description: "Sizes and spaces come from the scale" },
+      },
+      (text) =>
+        dsArbitrary(text)
+          .filter(
+            ([, utility, value]) =>
+              dsIsSized(utility) &&
+              /\d/.test(value) &&
+              !value.startsWith("#") &&
+              !DS_COLOUR_FN.test(value) &&
+              !value.includes("var("),
+          )
+          .map(
+            ([cls]) =>
+              `\`${cls}\` is an arbitrary size: use the spacing scale, a radius or a type class. If designs keep needing it, ask design for a token.`,
+          ),
+    ),
+  },
+};
+
+/** Every app file but the vendored components and tests. */
+const tokensOnly: Linter.Config = {
+  files: ["**/*.{js,jsx,mjs,ts,tsx}"],
+  ignores: [
+    "**/components/ui/**",
+    "**/hooks/use-mobile.ts",
+    "**/components/theme-provider.tsx",
+    "**/*.{test,spec,stories}.{js,jsx,ts,tsx}",
+    "scripts/**",
+  ],
+  plugins: { "design-system": dsTokensPlugin },
+  rules: {
+    "design-system/no-raw-colour": "error",
+    "design-system/no-arbitrary-size": "warn",
+  },
+};
+// ---- end tokens only ----------------------------------------------------------
+
 const withDesignSystem = (entries: Linter.Config[]): Linter.Config[] => [
   ...entries,
+  tokensOnly,
   // Vendored components carry disable comments for other configs' rules
   // (react-hooks/exhaustive-deps); a repo that doesn't enable them would report
   // the comments as unused.
