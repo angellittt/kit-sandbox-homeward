@@ -425,45 +425,50 @@
   --font-heading: var(--font-display, var(--font-fallback-display)), var(--font-fallback-display);
 }
 
-/* Type scale. One class per named style from the type groups. */
+/* Type scale. One utility per named style from the type groups. As
+ * utilities they sort with Tailwind's own, so `type-body-1 text-sm` takes
+ * text-sm's size and the rest from the style, and variants work
+ * (`md:type-heading-1`). Listed in @source so each is always generated,
+ * used in a scanned file or not (the preview bundle scans components only). */
+@source inline("type-display-1 type-display-2 type-display-3 type-title-1 type-title-2 type-title-3 type-heading-1 type-heading-2 type-headline-1 type-headline-2 type-body-1 type-body-1-reading type-body-2 type-body-2-reading type-label-1 type-label-2 type-caption-1 type-caption-2 type-code");
 
 /* Display — display */
-.type-display-1 {
+@utility type-display-1 {
   font-family: var(--font-display, var(--font-fallback-display)), var(--font-fallback-display);
   font-size: 56px;
   line-height: 1.286;
   letter-spacing: -0.0319em;
   font-weight: 700;
 }
-.type-display-2 {
+@utility type-display-2 {
   font-family: var(--font-display, var(--font-fallback-display)), var(--font-fallback-display);
   font-size: 40px;
   line-height: 1.3;
   letter-spacing: -0.0282em;
   font-weight: 700;
 }
-.type-display-3 {
+@utility type-display-3 {
   font-family: var(--font-display, var(--font-fallback-display)), var(--font-fallback-display);
   font-size: 36px;
   line-height: 1.334;
   letter-spacing: -0.027em;
   font-weight: 700;
 }
-.type-title-1 {
+@utility type-title-1 {
   font-family: var(--font-display, var(--font-fallback-display)), var(--font-fallback-display);
   font-size: 32px;
   line-height: 1.375;
   letter-spacing: -0.0253em;
   font-weight: 700;
 }
-.type-title-2 {
+@utility type-title-2 {
   font-family: var(--font-display, var(--font-fallback-display)), var(--font-fallback-display);
   font-size: 28px;
   line-height: 1.358;
   letter-spacing: -0.0236em;
   font-weight: 700;
 }
-.type-title-3 {
+@utility type-title-3 {
   font-family: var(--font-display, var(--font-fallback-display)), var(--font-fallback-display);
   font-size: 24px;
   line-height: 1.334;
@@ -472,84 +477,84 @@
 }
 
 /* Text — sans */
-.type-heading-1 {
+@utility type-heading-1 {
   font-family: var(--font-sans, var(--font-fallback-sans)), var(--font-fallback-sans);
   font-size: 22px;
   line-height: 1.364;
   letter-spacing: -0.0194em;
   font-weight: 600;
 }
-.type-heading-2 {
+@utility type-heading-2 {
   font-family: var(--font-sans, var(--font-fallback-sans)), var(--font-fallback-sans);
   font-size: 20px;
   line-height: 1.4;
   letter-spacing: -0.012em;
   font-weight: 600;
 }
-.type-headline-1 {
+@utility type-headline-1 {
   font-family: var(--font-sans, var(--font-fallback-sans)), var(--font-fallback-sans);
   font-size: 18px;
   line-height: 1.445;
   letter-spacing: -0.0002em;
   font-weight: 600;
 }
-.type-headline-2 {
+@utility type-headline-2 {
   font-family: var(--font-sans, var(--font-fallback-sans)), var(--font-fallback-sans);
   font-size: 17px;
   line-height: 1.412;
   letter-spacing: 0em;
   font-weight: 600;
 }
-.type-body-1 {
+@utility type-body-1 {
   font-family: var(--font-sans, var(--font-fallback-sans)), var(--font-fallback-sans);
   font-size: 16px;
   line-height: 1.5;
   letter-spacing: 0.0057em;
   font-weight: 400;
 }
-.type-body-1-reading {
+@utility type-body-1-reading {
   font-family: var(--font-sans, var(--font-fallback-sans)), var(--font-fallback-sans);
   font-size: 16px;
   line-height: 1.625;
   letter-spacing: 0.0057em;
   font-weight: 400;
 }
-.type-body-2 {
+@utility type-body-2 {
   font-family: var(--font-sans, var(--font-fallback-sans)), var(--font-fallback-sans);
   font-size: 15px;
   line-height: 1.467;
   letter-spacing: 0.0096em;
   font-weight: 400;
 }
-.type-body-2-reading {
+@utility type-body-2-reading {
   font-family: var(--font-sans, var(--font-fallback-sans)), var(--font-fallback-sans);
   font-size: 15px;
   line-height: 1.6;
   letter-spacing: 0.0096em;
   font-weight: 400;
 }
-.type-label-1 {
+@utility type-label-1 {
   font-family: var(--font-sans, var(--font-fallback-sans)), var(--font-fallback-sans);
   font-size: 14px;
   line-height: 1.429;
   letter-spacing: 0.0145em;
   font-weight: 600;
 }
-.type-label-2 {
+@utility type-label-2 {
   font-family: var(--font-sans, var(--font-fallback-sans)), var(--font-fallback-sans);
   font-size: 13px;
   line-height: 1.385;
   letter-spacing: 0.0194em;
   font-weight: 600;
 }
-.type-caption-1 {
+@utility type-caption-1 {
   font-family: var(--font-sans, var(--font-fallback-sans)), var(--font-fallback-sans);
   font-size: 12px;
   line-height: 1.334;
   letter-spacing: 0.0252em;
   font-weight: 500;
 }
-.type-caption-2 {
+@utility type-caption-2 {
   font-family: var(--font-sans, var(--font-fallback-sans)), var(--font-fallback-sans);
   font-size: 11px;
   line-height: 1.273;
@@ -558,7 +563,7 @@
 }
 
 /* Code — mono */
-.type-code {
+@utility type-code {
   font-family: var(--font-mono, var(--font-fallback-mono)), var(--font-fallback-mono);
   font-size: 13px;
   line-height: 1.538;

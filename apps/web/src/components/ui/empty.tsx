@@ -1,4 +1,4 @@
-// design-system-kit 0.16.6 · profile shadcn · stock component (base-nova + baseline only)
+// design-system-kit 0.23.1 · profile shadcn · stock component (base-nova + baseline only)
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "cn";
 

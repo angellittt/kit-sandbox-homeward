@@ -1,4 +1,4 @@
-// design-system-kit 0.16.6 · profile shadcn · wiring: theme switching
+// design-system-kit 0.23.1 · profile shadcn · wiring: theme switching
 "use client";
 
 import * as React from "react";
@@ -6,9 +6,12 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 
 /**
  * next-themes writes data-theme="light" | "dark" on <html>, which is what the
- * generated token file keys off. Wrap the app in it from the root layout
- * (`<html suppressHydrationWarning>`); its blocking script prevents a flash
- * of the wrong theme.
+ * generated token file keys off; it works the same outside Next.js. Wrap the
+ * app in it once: on Vite, the root render in `main.tsx`
+ * (`<ThemeProvider><App /></ThemeProvider>`); on Next.js, the root layout's
+ * body, with `<html suppressHydrationWarning>` ("use client" is for Next.js
+ * too, and does nothing on Vite). Its blocking script prevents a flash of the
+ * wrong theme.
  */
 export function ThemeProvider({
   children,
