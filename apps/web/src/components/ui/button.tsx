@@ -5,6 +5,7 @@
  * - Radius roles (D1): base `rounded-lg` -> `rounded-md`; xs/sm/icon-xs/icon-sm `rounded-[min(var(--radius-md),…)]` -> `rounded-sm`; button-group override `rounded-lg` -> `rounded-md`.
  * - `link` variant `text-primary` -> `text-primary-text` (text-safe primary).
  * - Hovers wired to their tokens: default `hover:bg-primary/80` -> `hover:bg-primary-strong` (the hover Setup picks so on-primary keeps contrast); secondary `hover:bg-[color-mix(…secondary…foreground_5%)]` -> `hover:bg-fill-strong` (the hover for fill-normal).
+ * - Client (design tweak, 2026-10-19): default `h-8 px-2.5` -> `h-9 px-3`; icon `size-8` -> `size-9` (default buttons a little taller and roomier).
  */
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -28,11 +29,11 @@ const buttonVariants = cva(
       },
       size: {
         default:
-          "h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
+          "h-9 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
         xs: "h-6 gap-1 rounded-sm px-2 text-xs in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-7 gap-1 rounded-sm px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
         lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        icon: "size-8",
+        icon: "size-9",
         "icon-xs":
           "size-6 rounded-sm in-data-[slot=button-group]:rounded-md [&_svg:not([class*='size-'])]:size-3",
         "icon-sm": "size-7 rounded-sm in-data-[slot=button-group]:rounded-md",

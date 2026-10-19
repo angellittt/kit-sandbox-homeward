@@ -2,7 +2,7 @@
  * Source: Homeward tokens.json v1
  * Design system: https://claude.ai/artifact/84WiUVMfsipcsUEcWha35d
  * Schema ttt-ds/1 · profile shadcn
- * Snapshot synced: 2026-10-15T01:06:37Z
+ * Snapshot synced: 2026-10-19T20:35:31Z
  *
  * Regenerate with: node scripts/ds-tokens.mjs
  */
@@ -30,16 +30,16 @@
   --brand-secondary-80: #ffd7c0;
   --brand-secondary-90: #ffebdf;
   --brand-secondary-95: #fff5f0;
-  --brand-accent-10: #3c2710;
-  --brand-accent-20: #6b471e;
-  --brand-accent-30: #99672d;
-  --brand-accent-40: #c9873c;
-  --brand-accent-50: #f0a34c;
-  --brand-accent-60: #f7b267;
-  --brand-accent-70: #fcc58c;
-  --brand-accent-80: #ffdab4;
-  --brand-accent-90: #ffeddb;
-  --brand-accent-95: #fff7ef;
+  --brand-accent-10: #3e2607;
+  --brand-accent-20: #6b4307;
+  --brand-accent-30: #996005;
+  --brand-accent-40: #c67d00;
+  --brand-accent-50: #ec9707;
+  --brand-accent-60: #f2a541;
+  --brand-accent-70: #fabc74;
+  --brand-accent-80: #fed4a6;
+  --brand-accent-90: #ffebd6;
+  --brand-accent-95: #fff7ee;
   --positive-10: #0e2f1c;
   --positive-20: #195733;
   --positive-30: #257e4a;
