@@ -1,0 +1,59 @@
+# design-system-kit 0.37.0 · profile shadcn · wiring (CI): GitHub Actions, design branches
+#
+# Setup copies this to .github/workflows/design.yml with apps/web filled: the
+# app's folder from the repo root (`apps/web` in the starter template, `.` in a
+# single-package repo). Two jobs, both only for a designer's design/* branch:
+#
+# - scope: on the PR, `ds-validate --design-scope` fails when the branch changes
+#   a file outside the design paths (the token source and token file, the
+#   component folder, the design entry), naming each. It's for the dev who
+#   reviews; the designer never sees it. Needs only Node and git, so nothing is
+#   installed.
+# - figma-pending: when the PR merges, a comment whose first line is
+#   `figma-pending · design-system-kit`, and the `figma-pending` label (created
+#   the first time). Figma and the design system still show the version before
+#   the merge until someone updates them from code; that step swaps the label
+#   for `in-figma`.
+#
+# Pin the actions to a commit SHA if the repo pins its others.
+name: design
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, closed]
+permissions: {} # each job asks for what it needs
+jobs:
+  scope:
+    if: github.event.action != 'closed' && startsWith(github.head_ref, 'design/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0 # the base branch, to diff from where the branch left it
+          persist-credentials: false
+      - name: design paths only
+        env:
+          BASE: ${{ github.base_ref }}
+        run: node "apps/web/scripts/ds-validate.mjs" --repo "apps/web" --design-scope "origin/$BASE"
+  figma-pending:
+    if: github.event.action == 'closed' && github.event.pull_request.merged && startsWith(github.head_ref, 'design/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write # the label (labels are issues' on GitHub)
+      pull-requests: write # the comment
+    steps:
+      - name: mark it Figma pending
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          gh api "repos/$GH_REPO/labels" -f name=figma-pending -f color=FBCA04 -f description="Merged; Figma and the design system not updated yet" >/dev/null 2>&1 || true
+          gh api "repos/$GH_REPO/issues/$PR/labels" -f "labels[]=figma-pending" >/dev/null
+          gh pr comment "$PR" --body "figma-pending · design-system-kit
+
+          Merged into \`$BASE\`. Figma and the design system still show the version before this PR. Whoever has a Full Figma seat updates them from code (\"update Figma\" in a Claude session), then publishes the library; the label becomes \`in-figma\` then."

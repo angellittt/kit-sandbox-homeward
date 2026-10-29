@@ -37,6 +37,8 @@ CI_ONLY_STEPS=(
   "./.github/actions/sbom-scan|matches the SBOM against an advisory feed that changes without a commit; needs network and isn't a required check (see SBOM.md)"
   "code-coverage.yml: Generate and read coverage summary|reads the coverage report \`test\` already produced"
   "lint.yml: Test ci:local under bash 3.2|runs the ci:local tests under macOS's bash 3.2 in Docker, which the hooks can't assume is installed"
+  "design.yml: design paths only|design-system-kit's scope check for designers' design/* PRs: diffs the branch against the PR's base, which a commit hook doesn't have, and flags rather than gates"
+  "design.yml: mark it Figma pending|labels and comments on a merged design/* PR; runs no check"
 )
 
 # Prints the body of a package.json script, or nothing if it doesn't exist.

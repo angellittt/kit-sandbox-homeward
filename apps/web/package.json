@@ -11,7 +11,8 @@
     "lint": "oxlint && eslint .",
     "lint:fix": "oxlint --fix; ox=$?; eslint . --fix && exit $ox",
     "ds:validate": "node scripts/ds-validate.mjs",
-    "build:safe": "vite build"
+    "build:safe": "vite build",
+    "build:design": "vite build --config vite.design.config.ts"
   },
   "dependencies": {
     "@base-ui/react": "1.8.0",
