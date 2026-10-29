@@ -1,4 +1,4 @@
-// design-system-kit 0.23.1 · profile shadcn · kit extension (replaces the stock file)
+// design-system-kit 0.37.0 · profile shadcn · kit extension (replaces the stock file)
 /**
  * Stock base-nova (shadcn 4.21.1, 2026-10-07) + TTT baseline:
  * - DialogOverlay: bg-black/10 -> bg-dimmer; open/close animation wrapped in motion-safe:.
@@ -6,6 +6,7 @@
  * - DialogHeader: pr-10 so a long title clears the close button.
  * + TTT kit extensions:
  * - DialogContent size sm | default | lg (Width presets): cva + data-size. default is stock's sm:max-w-sm; sm is sm:max-w-xs; lg is sm:max-w-lg.
+ * - Layer and icon tokens: overlays' `z-50` -> `z-(--layer-overlay)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).
  */
 "use client";
 
@@ -41,7 +42,7 @@ function DialogOverlay({
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-dimmer duration-100 supports-backdrop-filter:backdrop-blur-xs motion-safe:data-open:animate-in motion-safe:data-open:fade-in-0 motion-safe:data-closed:animate-out motion-safe:data-closed:fade-out-0",
+        "fixed inset-0 isolate z-(--layer-overlay) bg-dimmer duration-100 supports-backdrop-filter:backdrop-blur-xs motion-safe:data-open:animate-in motion-safe:data-open:fade-in-0 motion-safe:data-closed:animate-out motion-safe:data-closed:fade-out-0",
         className,
       )}
       {...props}
@@ -50,7 +51,7 @@ function DialogOverlay({
 }
 
 const dialogContentVariants = cva(
-  "fixed top-1/2 left-1/2 z-50 grid max-h-[calc(100vh-2*--spacing(5))] w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 overflow-auto rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none motion-safe:data-open:animate-in motion-safe:data-open:fade-in-0 motion-safe:data-open:zoom-in-95 motion-safe:data-closed:animate-out motion-safe:data-closed:fade-out-0 motion-safe:data-closed:zoom-out-95",
+  "fixed top-1/2 left-1/2 z-(--layer-overlay) grid max-h-[calc(100vh-2*--spacing(5))] w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 overflow-auto rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none motion-safe:data-open:animate-in motion-safe:data-open:fade-in-0 motion-safe:data-open:zoom-in-95 motion-safe:data-closed:animate-out motion-safe:data-closed:fade-out-0 motion-safe:data-closed:zoom-out-95",
   {
     variants: {
       size: {

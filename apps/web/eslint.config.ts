@@ -1,7 +1,7 @@
 import reactEslintConfig from "@repo/eslint-config/eslint.react.config";
 import { disableRulesCoveredByOxlint } from "@repo/eslint-config/oxlint";
 import { defineConfig } from "eslint/config";
-// design-system-kit 0.23.1 · profile shadcn · wiring (Vite): ESLint, for a TypeScript config
+// design-system-kit 0.37.0 · profile shadcn · wiring (Vite): ESLint, for a TypeScript config
 import type { ESLint, Linter, Rule } from "eslint";
 import { builtinRules } from "eslint/use-at-your-own-risk";
 
@@ -14,14 +14,35 @@ const DS_VENDORED = [
   "src/components/theme-provider.tsx",
   "src/hooks/use-mobile.ts",
 ];
-// Rules from these plugins stay on everywhere: accessibility and hooks.
-const DS_ALWAYS_ON = new Set(["jsx-a11y", "react-hooks"]);
+// Style rules stock files break, off for them by name. ESLint types these
+// "suggestion", and so are checks worth keeping (typescript-eslint's
+// no-explicit-any and require-await), so the type alone can't pick them out.
+// On TTT's starter template: prefer-arrow-functions on 41 stock files, import
+// order on 8.
+const DS_STYLE_RULES = new Set([
+  "prefer-arrow-functions/prefer-arrow-functions",
+  "import-x/order",
+  "import/order",
+  "func-style",
+  "sort-imports",
+]);
 
-// The repo's style rules — those ESLint itself types "layout" or "suggestion"
-// (prefer-arrow-functions, import-x/order) — off for the vendored files only.
-// Correctness ("problem") rules stay on. Only rules the repo turns on are named.
-// (Maps rather than object lookups, so a repo's security rules don't flag it.)
+// The repo's style rules, off for the vendored files only: every rule ESLint
+// types "layout" (formatting), and the rules DS_STYLE_RULES names. Everything
+// else stays on — correctness, security, hooks and accessibility among it.
+// Only rules the repo turns on are named. (Where oxlint runs the accessibility
+// rules, its override turns a few off for the stock files that need it:
+// oxlint.design-system.jsonc.) Maps rather than object lookups, so a repo's
+// security rules don't flag it.
 type DsRule = { meta?: { type?: string } };
+// The few node fields dsIsLink reads, JSX's among them.
+type DsNode = {
+  type: string;
+  parent?: DsNode;
+  name?: { name?: string };
+  key?: { name?: string; value?: string };
+  left?: { property?: { name?: string } };
+};
 const dsStyleRulesOff = (entries: Linter.Config[]): Linter.Config => {
   const plugins = new Map<string, Map<string, DsRule>>();
   for (const e of entries) {
@@ -45,13 +66,13 @@ const dsStyleRulesOff = (entries: Linter.Config[]): Linter.Config => {
     }
   }
   const style = [...on].filter((id) => {
+    if (DS_STYLE_RULES.has(id)) return true;
     const slash = id.lastIndexOf("/");
-    const plugin = slash === -1 ? null : id.slice(0, slash);
-    if (plugin && DS_ALWAYS_ON.has(plugin)) return false;
-    const type = plugin
-      ? plugins.get(plugin)?.get(id.slice(slash + 1))?.meta?.type
-      : builtinRules.get(id)?.meta?.type;
-    return type === "layout" || type === "suggestion";
+    const type =
+      slash === -1
+        ? builtinRules.get(id)?.meta?.type
+        : plugins.get(id.slice(0, slash))?.get(id.slice(slash + 1))?.meta?.type;
+    return type === "layout";
   });
   return {
     files: DS_VENDORED,
@@ -62,7 +83,8 @@ const dsStyleRulesOff = (entries: Linter.Config[]): Linter.Config => {
 // ---- design-system-kit: tokens only -----------------------------------------
 // App code styles with the design system's tokens: the Tailwind names in its
 // "Using in code". A raw colour (`bg-[#1a2b3c]`, `text-[oklch(…)]`, a "#fff"
-// string) is an error; an arbitrary size or space (`p-[18px]`, `text-[13px]`,
+// string) is an error, and so is a default palette class (`bg-zinc-500`), which
+// the token file turns off; an arbitrary size or space (`p-[18px]`, `text-[13px]`,
 // `rounded-[10px]`) is a warning, since layout sometimes needs one. A value the
 // tokens keep missing is a token request to design, not an override. An
 // exception is an eslint-disable comment that says why. Vendored components
@@ -79,6 +101,31 @@ const dsIsColourLiteral = (text: string): boolean => {
     DS_HEX.test(t) ||
     (DS_COLOUR_LITERAL_FN.test(t) && t.indexOf(")") === t.length - 1)
   );
+};
+// A link or a fragment can read as hex ("#add", "#faded"): a string that is the
+// value of an href, to, hash, src or action attribute or property, or assigned
+// to one (`location.hash = "#add"`), is never a colour literal.
+const DS_LINK_NAMES = new Set([
+  "href",
+  "to",
+  "hash",
+  "src",
+  "action",
+  "formAction",
+]);
+const dsIsLink = (node: Rule.Node): boolean => {
+  let p = (node as unknown as DsNode).parent;
+  while (
+    p &&
+    (p.type === "TemplateLiteral" || p.type === "JSXExpressionContainer")
+  )
+    p = p.parent;
+  if (p?.type === "JSXAttribute") return DS_LINK_NAMES.has(p.name?.name ?? "");
+  if (p?.type === "Property")
+    return DS_LINK_NAMES.has(p.key?.name ?? p.key?.value ?? "");
+  if (p?.type === "AssignmentExpression")
+    return DS_LINK_NAMES.has(p.left?.property?.name ?? "");
+  return false;
 };
 const DS_SIZED = new Set(
   "p px py pt pr pb pl ps pe m mx my mt mr mb ml ms me gap gap-x gap-y space-x space-y w h size min-w min-h max-w max-h inset inset-x inset-y top right bottom left rounded text leading tracking translate-x translate-y".split(
@@ -107,14 +154,45 @@ const dsArbitrary = (text: string): [string, string, string][] =>
     return m ? [[cls, m[1], m[2]] as [string, string, string]] : [];
   });
 
+// Tailwind's default palette (`bg-zinc-500`, `hover:text-red-600/80`): the token
+// file turns it off, so such a class styles nothing. Black and white stay on.
+const DS_PALETTE_HUES = new Set(
+  "slate gray zinc neutral stone red orange amber yellow lime green emerald teal cyan sky blue indigo violet purple fuchsia pink rose".split(
+    " ",
+  ),
+);
+const DS_PALETTE_UTILITIES = new Set(
+  "bg text border border-t border-r border-b border-l border-x border-y border-s border-e ring ring-offset outline fill stroke from via to divide decoration placeholder caret accent shadow inset-shadow drop-shadow".split(
+    " ",
+  ),
+);
+const DS_PALETTE_STEP = /^(?:50|[1-9]00|950)$/;
+/** The default-palette classes in a class string: `hover:bg-zinc-500/50`. */
+const dsPalette = (text: string) =>
+  text.split(/\s+/).filter((cls) => {
+    const parts = cls
+      .slice(cls.lastIndexOf(":") + 1)
+      .replace(/^!|!$/g, "")
+      .replace(/\/\d+$/, "")
+      .split("-");
+    const step = parts.pop() ?? "";
+    const hue = parts.pop() ?? "";
+    return (
+      DS_PALETTE_STEP.test(step) &&
+      DS_PALETTE_HUES.has(hue) &&
+      DS_PALETTE_UTILITIES.has(parts.join("-"))
+    );
+  });
+
 const dsStringRule = (
   meta: Rule.RuleMetaData,
-  check: (text: string) => string[],
+  check: (text: string, node: Rule.Node) => string[],
 ): Rule.RuleModule => ({
   meta: { ...meta, schema: [] },
   create: (context) => {
     const visit = (node: Rule.Node, text: string) => {
-      for (const message of check(text)) context.report({ node, message });
+      for (const message of check(text, node))
+        context.report({ node, message });
     };
     return {
       Literal: (node) => {
@@ -133,7 +211,7 @@ const dsTokensPlugin: ESLint.Plugin = {
         type: "problem",
         docs: { description: "Colours come from the design system's tokens" },
       },
-      (text) => [
+      (text, node) => [
         ...dsArbitrary(text)
           .filter(
             ([, , value]) => value.startsWith("#") || DS_COLOUR_FN.test(value),
@@ -142,7 +220,11 @@ const dsTokensPlugin: ESLint.Plugin = {
             ([cls]) =>
               `\`${cls}\` is a raw colour: use a token's Tailwind name ("Using in code"). A colour the tokens don't have is a token request to design.`,
           ),
-        ...(dsIsColourLiteral(text)
+        ...dsPalette(text).map(
+          (cls) =>
+            `\`${cls}\` is Tailwind's default palette, which the token file turns off: use a token's Tailwind name ("Using in code").`,
+        ),
+        ...(dsIsColourLiteral(text) && !dsIsLink(node)
           ? [
               `"${text.trim()}" is a raw colour: use a token (var(--<token>) or its Tailwind name). A colour the tokens don't have is a token request to design.`,
             ]
@@ -190,16 +272,75 @@ const tokensOnly: Linter.Config = {
 };
 // ---- end tokens only ----------------------------------------------------------
 
+// ---- design-system-kit: the design entry stays out of the app ---------------
+// The design entry (src/design/: the shell, the pages, the wireframe
+// components) is for designing only and never ships: nothing outside it may
+// import from it, by the "@/design" alias or a relative path. Tests may.
+const DS_DESIGN = /(^|\/)src\/design(\/|$)/;
+const dsSlashes = (path: string): string => path.split("\\").join("/");
+/** A relative specifier resolved against the importing file's folder. */
+const dsResolve = (filename: string, specifier: string): string => {
+  const parts = dsSlashes(filename).split("/").slice(0, -1);
+  for (const seg of specifier.split("/")) {
+    if (seg === "..") parts.pop();
+    else if (seg !== "." && seg !== "") parts.push(seg);
+  }
+  return parts.join("/");
+};
+const dsIsDesignImport = (specifier: string, filename: string): boolean =>
+  /^@\/design(\/|$)/.test(specifier) ||
+  (specifier.startsWith(".") && DS_DESIGN.test(dsResolve(filename, specifier)));
+
+const dsDesignPlugin: ESLint.Plugin = {
+  rules: {
+    "no-design-import": {
+      meta: {
+        type: "problem",
+        docs: {
+          description:
+            "The design entry (src/design/) is never imported by the app",
+        },
+        schema: [],
+      },
+      create: (context) => {
+        const filename = dsSlashes(context.filename);
+        if (DS_DESIGN.test(filename)) return {};
+        const check = (node: Rule.Node) => {
+          const specifier = (node as { source?: { value?: unknown } | null })
+            .source?.value;
+          if (
+            typeof specifier === "string" &&
+            dsIsDesignImport(specifier, filename)
+          )
+            context.report({
+              node,
+              message: `"${specifier}" is the design entry (src/design/), which is for designing only and never ships: the app can't import it.`,
+            });
+        };
+        return {
+          ImportDeclaration: check,
+          ExportNamedDeclaration: check,
+          ExportAllDeclaration: check,
+          ImportExpression: check,
+        };
+      },
+    },
+  },
+};
+
+/** Every app file but tests: nothing imports the design entry. */
+const designEntryOut: Linter.Config = {
+  files: ["**/*.{js,jsx,mjs,ts,tsx}"],
+  ignores: ["**/*.{test,spec,stories}.{js,jsx,ts,tsx}", "scripts/**"],
+  plugins: { "design-entry": dsDesignPlugin },
+  rules: { "design-entry/no-design-import": "error" },
+};
+// ---- end design entry -----------------------------------------------------------
+
 const withDesignSystem = (entries: Linter.Config[]): Linter.Config[] => [
   ...entries,
   tokensOnly,
-  // Vendored components carry disable comments for other configs' rules
-  // (react-hooks/exhaustive-deps); a repo that doesn't enable them would report
-  // the comments as unused.
-  {
-    files: ["src/components/ui/**"],
-    linterOptions: { reportUnusedDisableDirectives: "off" },
-  },
+  designEntryOut,
   dsStyleRulesOff(entries),
   // The kit files a repo carries for its CI check are linted in the kit.
   { ignores: ["scripts/ds-validate.mjs", "scripts/ds-drift.test.mjs"] },

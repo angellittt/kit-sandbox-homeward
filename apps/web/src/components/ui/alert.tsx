@@ -1,4 +1,4 @@
-// design-system-kit 0.23.1 · profile shadcn · kit extension (replaces the stock file)
+// design-system-kit 0.37.0 · profile shadcn · kit extension (replaces the stock file)
 /**
  * Stock base-nova (shadcn 4.21.1, 2026-10-07) + TTT baseline:
  * - AlertDescription: `group-has-[>svg]/alert:col-start-2` pins the description to the text column when an icon is present.
@@ -7,11 +7,13 @@
  * - Semantic colour (profile capability "Semantic colour"): `tone` prop
  *   (neutral / info / positive / cautionary / negative) alongside stock's
  *   `variant`, exposed as `data-tone`. Status is never carried by tint alone:
- *   every tone expects an icon and wording. `info` uses the neutral fill.
+ *   every tone expects an icon and wording. `info` is the status-info pair
+ *   (its own ramp since kit 0.28.14), so info and neutral read apart.
  * - Urgent-only interruption (candidate): `urgent` prop; only an urgent alert
  *   takes `role="alert"`. Everything else is read in reading order.
  * - Dismiss button (candidate): `AlertDismiss` emits `onDismiss` and never
  *   hides itself; remembering a dismissal is the application's job.
+ * - Layer and icon tokens: icon sizes `size-3`/`3.5`/`4`/`5` -> `size-(--icon-xs|sm|md|lg)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).
  */
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -21,7 +23,7 @@ import { XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const alertVariants = cva(
-  "group/alert relative grid w-full gap-0.5 rounded-lg border px-2.5 py-2 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4",
+  "group/alert relative grid w-full gap-0.5 rounded-lg border px-2.5 py-2 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-(--icon-md)",
   {
     variants: {
       variant: {
@@ -42,7 +44,7 @@ const alertToneVariants = cva("*:data-[slot=alert-description]:text-current", {
   variants: {
     tone: {
       neutral: "bg-fill-alternative text-label-normal",
-      info: "bg-fill-alternative text-label-normal",
+      info: "bg-status-info-soft text-status-info",
       positive: "bg-status-positive-soft text-status-positive",
       cautionary: "bg-status-cautionary-soft text-status-cautionary",
       negative: "bg-status-negative-soft text-status-negative",

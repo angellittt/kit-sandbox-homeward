@@ -2,23 +2,49 @@
   "ignore": {
     "overrides": [
       {
-        "files": ["src/components/ui/**", "src/hooks/use-mobile.ts"],
+        "files": ["src/components/ui/breadcrumb.tsx"],
+        "rules": ["react-doctor/prefer-tag-over-role"]
+      },
+      {
+        "files": ["src/components/ui/pagination.tsx"],
+        "rules": [
+          "react-doctor/no-redundant-roles",
+          "jsx-a11y/anchor-has-content"
+        ]
+      },
+      {
+        "files": ["src/components/ui/input-group.tsx"],
+        "rules": [
+          "jsx-a11y/click-events-have-key-events",
+          "jsx-a11y/no-noninteractive-element-interactions"
+        ]
+      },
+      {
+        "files": ["src/components/ui/label.tsx"],
+        "rules": ["jsx-a11y/label-has-associated-control"]
+      },
+      {
+        "files": ["src/components/ui/date-picker.tsx"],
+        "rules": ["jsx-a11y/no-autofocus"]
+      },
+      {
+        "files": ["src/components/ui/field.tsx"],
+        "rules": ["react-doctor/no-array-index-as-key"]
+      },
+      {
+        "files": ["src/components/ui/toggle-group.tsx"],
+        "rules": ["react-doctor/jsx-no-constructed-context-values"]
+      },
+      {
+        "files": ["src/components/ui/**"],
         "rules": [
           "react-doctor/only-export-components",
-          "react-doctor/prefer-tag-over-role",
-          "react-doctor/no-redundant-roles",
-          "react-doctor/no-array-index-as-key",
-          "react-doctor/jsx-no-constructed-context-values",
-          "react/only-export-components",
-          "react/set-state-in-effect",
-          "jsx-a11y/prefer-tag-over-role",
-          "jsx-a11y/click-events-have-key-events",
-          "jsx-a11y/no-noninteractive-element-interactions",
-          "jsx-a11y/label-has-associated-control",
-          "jsx-a11y/no-autofocus",
-          "jsx-a11y/anchor-has-content",
-          "typescript/no-non-null-assertion"
+          "react/only-export-components"
         ]
+      },
+      {
+        "files": ["src/hooks/use-mobile.ts"],
+        "rules": ["react/set-state-in-effect"]
       },
       {
         "files": ["scripts/**"]

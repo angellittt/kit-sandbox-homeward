@@ -16,27 +16,89 @@
       "files": ["src/lib/axios.ts", "src/lib/__tests__/axios.test.ts"],
       "rules": { "repo/no-direct-axios": "off" }
     },
-    // design-system-kit 0.23.1: vendored components, kit scripts
+    // design-system-kit 0.37.0: vendored components, kit scripts
     {
+      // Wrappers that keep shadcn's markup: <div role="group"> (ButtonGroup,
+      // InputGroup, Field), the breadcrumb's current page, Spinner's status.
       "files": [
-        "src/components/ui/**",
-        "src/hooks/use-mobile.ts",
-        "scripts/**"
+        "src/components/ui/breadcrumb.tsx",
+        "src/components/ui/button-group.tsx",
+        "src/components/ui/field.tsx",
+        "src/components/ui/input-group.tsx",
+        "src/components/ui/spinner.tsx"
       ],
+      "rules": { "jsx-a11y/prefer-tag-over-role": "off" }
+    },
+    {
+      // InputGroupAddon's click focuses the input inside it, which has the keys.
+      "files": ["src/components/ui/input-group.tsx"],
       "rules": {
-        "jsx-a11y/prefer-tag-over-role": "off",
         "jsx-a11y/click-events-have-key-events": "off",
-        "jsx-a11y/no-noninteractive-element-interactions": "off",
-        "jsx-a11y/label-has-associated-control": "off",
-        "jsx-a11y/no-autofocus": "off",
-        "react/only-export-components": "off",
-        "react/set-state-in-effect": "off",
-        "typescript/no-non-null-assertion": "off",
-        "unicorn/prefer-string-starts-ends-with": "off",
-        "unicorn/no-useless-spread": "off",
-        "eslint/no-unused-vars": "off",
-        "eslint/no-constant-binary-expression": "off"
+        "jsx-a11y/no-noninteractive-element-interactions": "off"
       }
+    },
+    {
+      // Label's control arrives as children, or through htmlFor in its props.
+      "files": ["src/components/ui/label.tsx"],
+      "rules": { "jsx-a11y/label-has-associated-control": "off" }
+    },
+    {
+      // PaginationLink's <a> gets its children through props.
+      "files": ["src/components/ui/pagination.tsx"],
+      "rules": { "jsx-a11y/anchor-has-content": "off" }
+    },
+    {
+      // DatePicker focuses its input when the calendar opens, on purpose.
+      "files": ["src/components/ui/date-picker.tsx"],
+      "rules": { "jsx-a11y/no-autofocus": "off" }
+    },
+    {
+      // cva variant helpers, and DatePicker's and DataTable's documented helpers,
+      // are exported beside the component by design; any component may have one.
+      "files": ["src/components/ui/**"],
+      "rules": { "react/only-export-components": "off" }
+    },
+    {
+      // Stock: it reads the breakpoint in an effect.
+      "files": ["src/hooks/use-mobile.ts"],
+      "rules": { "react/set-state-in-effect": "off" }
+    },
+    {
+      // The design entry (src/design/: the shell, the pages, the wireframe
+      // components) is for designing only and never ships: nothing outside it
+      // imports it, by the alias or a relative path to one of the kit's own
+      // files. If the repo already sets no-restricted-imports here, add these
+      // patterns to its own instead (a later override replaces the rule's
+      // options). The next object turns it off inside the design entry.
+      "files": ["src/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/design",
+                  "@/design/**",
+                  "**/design/wireframe",
+                  "**/design/wireframe/**",
+                  "**/design/pages",
+                  "**/design/pages/**",
+                  "**/design/shell",
+                  "**/design/theme",
+                  "**/design/main"
+                ],
+                "message": "The design entry (src/design/) is for designing only and never ships: the app can't import it."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/design/**", "src/**/*.test.{ts,tsx}"],
+      "rules": { "no-restricted-imports": "off" }
     }
+    // end design-system-kit
   ]
 }

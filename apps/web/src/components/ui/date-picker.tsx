@@ -1,4 +1,4 @@
-// design-system-kit 0.23.1 · profile shadcn · kit extension (replaces the stock file)
+// design-system-kit 0.37.0 · profile shadcn · kit extension (replaces the stock file)
 "use client";
 
 import * as React from "react";
@@ -40,6 +40,8 @@ import { cn } from "cn";
  * Baseline (in this file because it has no stock file):
  * - `defaultMonth` follows the typed or selected value (the documented
  *   composition opens on today's month).
+ * - The calendar's popover is named (`calendarLabel`, `rangeCalendarLabel`):
+ *   it's a dialog, and the documented composition leaves it nameless.
  * - `locale` defaults to `appLocale`, and `dateFormat` to `appDateFormat`
  *   (`@/lib/locale`). Per the contract, a set `dateFormat` overrides the
  *   locale's own pattern; otherwise the pattern comes from the locale.
@@ -114,6 +116,9 @@ export type DatePickerStrings = {
   /** Shown when a range's end falls before its start. */
   endBeforeStart: string;
   openLabel: string;
+  /** The open calendar's accessible name (its popover is a dialog). */
+  calendarLabel: string;
+  rangeCalendarLabel: string;
   startLabel: string;
   endLabel: string;
   /** The button's text with no value, when `typed` is false. */
@@ -125,6 +130,8 @@ const defaultStrings: DatePickerStrings = {
   invalid: (hint) => `Use ${hint} — for example ${hint.replace(/[A-Z]/g, "0")}`,
   endBeforeStart: "The end date can't be before the start date",
   openLabel: "Open calendar",
+  calendarLabel: "Choose a date",
+  rangeCalendarLabel: "Choose a date range",
   startLabel: "Start date",
   endLabel: "End date",
   placeholder: "Pick a date",
@@ -178,17 +185,24 @@ type RangeProps = Common & {
 
 export type DatePickerProps = SingleProps | RangeProps;
 
-/** The calendar's popover, positioned as in shadcn's examples. */
+/**
+ * The calendar's popover, positioned as in shadcn's examples. It's a
+ * role="dialog", so it carries `label` as its name: a screen reader would
+ * otherwise announce only "dialog".
+ */
 function CalendarContent({
   typed,
+  label,
   children,
 }: {
   typed: boolean;
+  label: string;
   children: React.ReactNode;
 }) {
   return typed ? (
     // Lines the calendar up with the end of the field, not the button.
     <PopoverContent
+      aria-label={label}
       align="end"
       alignOffset={-8}
       sideOffset={10}
@@ -197,7 +211,11 @@ function CalendarContent({
       {children}
     </PopoverContent>
   ) : (
-    <PopoverContent align="start" className="w-auto overflow-hidden p-0">
+    <PopoverContent
+      aria-label={label}
+      align="start"
+      className="w-auto overflow-hidden p-0"
+    >
       {children}
     </PopoverContent>
   );
@@ -413,7 +431,7 @@ function SingleDatePicker({
           />
         )}
       </div>
-      <CalendarContent typed={typed}>
+      <CalendarContent typed={typed} label={strings.calendarLabel}>
         <Calendar
           mode="single"
           locale={locale}
@@ -539,7 +557,7 @@ function RangeDatePicker({
           />
         )}
       </div>
-      <CalendarContent typed={typed}>
+      <CalendarContent typed={typed} label={strings.rangeCalendarLabel}>
         <Calendar
           mode="range"
           locale={locale}

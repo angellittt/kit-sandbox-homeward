@@ -1,9 +1,10 @@
-// design-system-kit 0.23.1 · profile shadcn · kit extension (replaces the stock file)
+// design-system-kit 0.37.0 · profile shadcn · kit extension (replaces the stock file)
 /**
  * Stock base-nova (shadcn 4.21.1, 2026-10-07), no baseline changes.
  * + TTT kit extensions:
  * - tone neutral | primary | secondary | accent (Semantic colour): sets --t-solid/--t-on on the root (data-tone); AvatarFallback reads them. No tone keeps stock's muted fallback.
  * - initialsOf() (Initials): "Ada Lovelace" -> "AL".
+ * - Layer and icon tokens: icon sizes `size-3`/`3.5`/`4`/`5` -> `size-(--icon-xs|sm|md|lg)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).
  */
 "use client";
 
@@ -112,7 +113,7 @@ function AvatarGroupCount({
     <div
       data-slot="avatar-group-count"
       className={cn(
-        "relative flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3",
+        "relative flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&>svg]:size-(--icon-md) group-has-data-[size=lg]/avatar-group:[&>svg]:size-(--icon-lg) group-has-data-[size=sm]/avatar-group:[&>svg]:size-(--icon-xs)",
         className,
       )}
       {...props}
@@ -126,7 +127,7 @@ function initialsOf(name: string) {
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
-    .map((part) => part[0]!.toUpperCase())
+    .map((part) => part.charAt(0).toUpperCase())
     .join("");
 }
 

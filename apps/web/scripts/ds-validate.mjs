@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// design-system-kit 0.23.1 · profile shadcn · kit file — fix it in the kit, not per client
+// design-system-kit 0.37.0 · profile shadcn · kit file — fix it in the kit, not per client
 /**
  * ds-validate.mjs — the contract's config validation.
  *
@@ -20,6 +20,13 @@
  *                                             # tokens stay outside the checkout)
  *   node scripts/ds-validate.mjs --template <config.json> --tokens <tokens.json>
  *                                             # the kit's own templates ("{{…}}" allowed)
+ *   node scripts/ds-validate.mjs --design-scope <base> [--repo <app>]
+ *                                             # a designer's design/* branch: fail on any
+ *                                             # file it changes since <base> outside the
+ *                                             # design paths (designPaths below); exits 1
+ *                                             # naming each, 2 when git can't diff. Needs
+ *                                             # only node and git, so CI runs it before
+ *                                             # installing anything (wiring/ci/)
  *
  * Checks `.ttt/design-system.json` against the schema below (every key), the
  * token snapshot it points at (name grammar, aliases, cycles, colour formats,
@@ -41,9 +48,10 @@ import { readFileSync, existsSync } from "node:fs"
 import { join, resolve, dirname, relative } from "node:path"
 import { fileURLToPath } from "node:url"
 import { createRequire } from "node:module"
+import { spawnSync } from "node:child_process"
 
 /** The kit these scripts belong to. A repo may not claim a newer one. */
-export const KIT_VERSION = "0.23.1"
+export const KIT_VERSION = "0.37.0"
 const SCHEMA = "ttt-ds/1"
 const PROFILE = "shadcn"
 
@@ -53,6 +61,17 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 // Profile: shadcn. The contract's token mapping table, in full.
 // shadcn variable -> semantic token name.
 // ---------------------------------------------------------------------------
+/** The control set's tokens (Button, Input, InputGroup, Select, Combobox, Toggle, Textarea read them). */
+export const CONTROL_SIZES = ["control-height-sm", "control-height-md", "control-height-lg", "control-padding-x"]
+export const CONTROL_LABELS = ["control-label-sm", "control-label-md"]
+/** The other families components read (z-index, icon sizes, line widths, breakpoints), by family. */
+export const REQUIRED_FAMILIES = {
+  layer: ["layer-sticky", "layer-overlay"],
+  icon: ["icon-xs", "icon-sm", "icon-md", "icon-lg", "icon-xl"],
+  border: ["border-width", "focus-ring-width", "focus-ring-offset"],
+  breakpoint: ["breakpoint-sm", "breakpoint-md", "breakpoint-lg", "breakpoint-xl", "breakpoint-2xl"],
+}
+
 export const SHADCN_MAP = {
   background: "background-normal",
   foreground: "label-normal",
@@ -110,6 +129,8 @@ export const ALIAS_COLORS = {
   "cautionary-soft": "status-cautionary-soft",
   negative: "status-negative",
   "negative-soft": "status-negative-soft",
+  info: "status-info",
+  "info-soft": "status-info-soft",
   inverse: "inverse-background",
   "inverse-foreground": "inverse-label",
   dimmer: "material-dimmer",
@@ -167,7 +188,7 @@ export const isColour = (v) => COLOUR.some((re) => re.test(String(v).trim()))
 const LENGTH = /^-?(\d+\.?\d*|\.\d+)(px|rem|em|%)?$/
 
 /** The contract's standard primitive ramps. A client may add more, named by role. */
-export const STANDARD_RAMPS = ["brand-primary", "brand-secondary", "brand-accent", "neutral", "positive", "cautionary", "negative"]
+export const STANDARD_RAMPS = ["brand-primary", "brand-secondary", "brand-accent", "neutral", "positive", "cautionary", "negative", "info"]
 /** Words that name a hue, not a role. A ramp name containing one is rejected. */
 const HUE_WORDS = new Set(("red orange amber yellow lime green emerald teal cyan sky blue indigo violet purple " +
   "fuchsia pink rose magenta plum lavender lilac mauve maroon crimson scarlet tomato coral salmon peach " +
@@ -205,31 +226,41 @@ const CONFIG_SCHEMA = {
   tokensOut: { required: true, check: (v) => typeof v === "string" && v.endsWith(".css") ? null : 'set it to the generated token file, e.g. "src/styles/ds-tokens.css"' },
   lastSynced: { required: true, check: (v) => typeof v === "string" && /^\d{4}-\d\d-\d\dT\d\d:\d\d(:\d\d)?(\.\d+)?Z$/.test(v) && !isNaN(Date.parse(v)) ? null : 'use an RFC 3339 UTC time from the system clock, e.g. "2026-10-07T18:01:26Z"' },
   typeClassPrefix: { required: true, check: (v) => typeof v === "string" && /^[a-z][a-z0-9-]*-$/.test(v) ? null : 'lowercase, ending in "-", e.g. "type-"' },
-  namespace: { required: true, check: (v) => typeof v === "string" && /^[A-Z][A-Za-z0-9_$]*$/.test(v) ? null : 'a PascalCase JavaScript identifier for the bundle global, e.g. "Acme"' },
-  bundleExtras: { required: false, check: (v) => isObject(v) && Object.values(v).every((a) => Array.isArray(a) && a.every((n) => typeof n === "string" && /^[A-Za-z_$][\w$]*$/.test(n))) ? null : 'map a module to the export names the bundle adds, e.g. {"sonner": ["toast"]}' },
+  // The preview bundle's global and its extra exports, retired with the bundle in kit 0.37.0: accepted and ignored.
+  namespace: { required: false, check: () => null },
+  bundleExtras: { required: false, check: () => null },
   componentFiles: { required: false, check: (v) => isObject(v) && Object.entries(v).every(([k, a]) => /^[A-Z][A-Za-z0-9]*$/.test(k) && Array.isArray(a) && a.length && a.every((f) => typeof f === "string" && /^[a-z0-9-]+\.tsx$/.test(f))) ? null : 'map each PascalCase component to its .tsx files, e.g. {"Input": ["input.tsx", "label.tsx"]}' },
-  framework: { required: false, check: (v) => v in FRAMEWORKS ? null : `one of ${Object.keys(FRAMEWORKS).map((f) => `"${f}"`).join(", ")}; leave it out for "next"` },
+  framework: { required: false, check: (v) => v in FRAMEWORKS ? null : v === "next" ? 'Next.js is no longer supported (dropped in kit 0.30.0): the kit supports "vite"' : '"vite", the only framework the kit supports' },
   contrast: { required: false, check: (v) => isObject(v) ? null : 'an object: { "intentional": [{ "foreground", "background"?, "reason" }] }' },
   usingInCode: { required: false, check: (v) => isObject(v) ? null : 'an object: { "notes": ["…"] }' },
-  // Split Setup: the start phase has built the branch and the design phase hasn't
-  // created the design system yet. Finish removes it with the link in place.
-  setup: { required: false, check: (v) => v === AWAITING_DESIGN ? null : `"${AWAITING_DESIGN}" while Setup waits on its design phase; /ds-setup finish removes it` },
+  // Setup under way. "template": a starter template on the kit's default look,
+  // not yet named for a project (/ds-setup start adopts it). "awaiting-design":
+  // the start phase is done and the design phase hasn't created the design
+  // system yet. Finish removes it with the link in place.
+  setup: { required: false, check: (v) => v === AWAITING_DESIGN || v === TEMPLATE ? null : `"${TEMPLATE}" in a starter template, "${AWAITING_DESIGN}" while Setup waits on its design phase; /ds-setup finish removes it` },
 }
 
 /** The config's `setup` value between Setup's start phase and its finish. */
 export const AWAITING_DESIGN = "awaiting-design"
+/** The config's `setup` value in a starter template, before a project adopts it. */
+export const TEMPLATE = "template"
+/** Keys a config may leave out while Setup is under way: nothing exists for them yet. */
+const NOT_YET = {
+  [TEMPLATE]: new Set(["designSystem", "tracker"]),
+  [AWAITING_DESIGN]: new Set(["designSystem"]),
+}
 
 // ---------------------------------------------------------------------------
 
-/** A Setup placeholder such as "{{NAMESPACE}}" — legal only in the kit's config template. */
+/** A Setup placeholder such as "{{TRACKER_URL}}" — legal only in the kit's config template. */
 const isPlaceholder = (v) => typeof v === "string" && /^\{\{[A-Z_]+\}\}$/.test(v)
 
 /** Every key of the config against the schema. `placeholders` accepts "{{…}}" values. */
 function checkConfig(config, err, { placeholders = false } = {}) {
   for (const [key, rule] of Object.entries(CONFIG_SCHEMA)) {
     if (!(key in config)) {
-      // No design system exists yet while Setup waits on its design phase.
-      if (key === "designSystem" && config.setup === AWAITING_DESIGN) continue
+      // No design system (and, in a template, no project) exists yet.
+      if (NOT_YET[config.setup]?.has(key)) continue
       if (rule.required) err(key, "is missing", rule.check(undefined) ?? "add it")
       continue
     }
@@ -287,8 +318,9 @@ export function validate(repo, { preflight = false, testedRange, system, tokens:
   }
 
   checkConfig(config, err)
-  const awaitingDesign = config.setup === AWAITING_DESIGN
-  if (awaitingDesign) notes.push("Setup is waiting on its design phase: no design system or System section yet (/ds-setup design, then /ds-setup finish)")
+  const setupUnderWay = config.setup === AWAITING_DESIGN || config.setup === TEMPLATE
+  if (config.setup === TEMPLATE) notes.push("A starter template on the kit's default look: no project, design system or System section yet (/ds-setup start adopts it for a project)")
+  else if (setupUnderWay) notes.push("Setup is waiting on its design phase: no design system or System section yet (/ds-setup design, then /ds-setup finish)")
   if ("settings" in config)
     warn("settings", "is in .ttt/design-system.json; since kit 0.5.0 locale, week start and date format live in the app's locale module", "copy the values into <aliases.lib>/locale.ts (wiring/locale.ts) and remove settings from the config")
 
@@ -299,7 +331,7 @@ export function validate(repo, { preflight = false, testedRange, system, tokens:
     else if (cmp < 0) warn("kitVersion", `is ${config.kitVersion}; these scripts are ${KIT_VERSION}`, `set it to ${KIT_VERSION} once the rest of the kit's files are synced`)
   }
   // Every kit script in the repo should name the same kit version.
-  for (const name of ["ds-tokens", "ds-pack-react", "ds-build-bundle", "ds-styling-maps", "ds-types", "ds-validate", "ds-contrast"]) {
+  for (const name of ["ds-tokens", "ds-cards", "ds-styling-maps", "ds-validate", "ds-contrast"]) {
     const p = join(repo, "scripts", `${name}.mjs`)
     if (!existsSync(p)) continue
     const v = /design-system-kit (\d+\.\d+\.\d+)/.exec(readFileSync(p, "utf8").slice(0, 400))?.[1]
@@ -313,8 +345,9 @@ export function validate(repo, { preflight = false, testedRange, system, tokens:
   if (!system && typeof config.systemIn === "string") {
     const p = join(repo, config.systemIn)
     if (existsSync(p)) system = p
-    else if (awaitingDesign) notes.push(`${config.systemIn} not written yet — /ds-setup finish snapshots it`)
-    else warn("systemIn", `points at ${config.systemIn}, which doesn't exist`, "run /ds-apply tokens to write the snapshot (Setup writes the first one)")
+    // A template says nothing more: its own note already says there's no System section yet.
+    else if (config.setup === AWAITING_DESIGN) notes.push(`${config.systemIn} not written yet — /ds-setup finish snapshots it`)
+    else if (!setupUnderWay) warn("systemIn", `points at ${config.systemIn}, which doesn't exist`, "run /ds-apply tokens to write the snapshot (Setup writes the first one)")
   }
 
   // ---- token snapshot ----------------------------------------------------------
@@ -337,7 +370,20 @@ export function validate(repo, { preflight = false, testedRange, system, tokens:
   if (typeof config.tokensOut === "string" && existsSync(join(repo, config.tokensOut))) {
     const synced = /Snapshot synced: (\S+)/.exec(readFileSync(join(repo, config.tokensOut), "utf8").slice(0, 600))?.[1]
     if (synced && config.lastSynced && synced !== config.lastSynced)
-      warn(config.tokensOut, `says "Snapshot synced: ${synced}" but lastSynced is ${config.lastSynced}`, "regenerate it with node scripts/ds-tokens.mjs (set lastSynced before regenerating)")
+      warn(config.tokensOut, `says "Snapshot synced: ${synced}" but lastSynced is ${config.lastSynced}`, "regenerate it with the plugin's ds-tokens.mjs (/ds-apply tokens; set lastSynced before regenerating)")
+  }
+  // The design entry's design-only themes (design/themes.css) come from the same run.
+  const designDir = sourceRoot(repo) && join(sourceRoot(repo), "design")
+  if (designDir && existsSync(join(designDir, "main.tsx"))) {
+    const themesCss = join(designDir, "themes.css")
+    const name = relative(repo, themesCss)
+    if (!existsSync(themesCss)) {
+      warn(name, "is missing, so the design entry fails to load", "generate it with the plugin's ds-tokens.mjs, which writes it with the token file")
+    } else {
+      const synced = /Snapshot synced: (\S+)/.exec(readFileSync(themesCss, "utf8").slice(0, 600))?.[1]
+      if (synced && config.lastSynced && synced !== config.lastSynced)
+        warn(name, `says "Snapshot synced: ${synced}" but lastSynced is ${config.lastSynced}`, "regenerate it with the plugin's ds-tokens.mjs (/ds-apply tokens)")
+    }
   }
 
   // ---- wiring: @source resolves to the source root -------------------------------
@@ -357,7 +403,7 @@ export function validate(repo, { preflight = false, testedRange, system, tokens:
   }
 
   // ---- pre-flight: installed versions vs the tested range --------------------------
-  if (preflight) checkTestedRange(repo, testedRange, err, config.framework ?? "next", warn, notes)
+  if (preflight) checkTestedRange(repo, testedRange, err, config.framework, warn, notes)
 
   return { errors, warnings, notes }
 }
@@ -464,6 +510,51 @@ function validateTokens(tokens, file, err, warn) {
   }
   if (!(tokens.spacing?.tokens ?? []).some((t) => t.name === "space-1"))
     warn(`${file} › space-1`, "is missing", "Tailwind's spacing base is set from space-1; without it utilities use Tailwind's default 0.25rem")
+  // The control set's tokens: every component in it reads them, so each must be there.
+  const controlTokens = new Map((tokens.control?.tokens ?? []).map((t) => [t.name, t]))
+  const typeStyles = new Set((tokens.type?.groups ?? []).flatMap((g) => (g.styles ?? []).map((s) => s.name)))
+  for (const name of CONTROL_SIZES) {
+    const t = controlTokens.get(name)
+    if (!t) err(where(name), "is missing; the control set's components need it", "add the control family in the design system (the kit's template has its default values), then re-pull")
+    else if (!LENGTH.test(String(t.value).trim())) err(where(name), `is ${JSON.stringify(t.value)}, not a length`, "use px or rem, such as 32px")
+  }
+  for (const name of CONTROL_LABELS) {
+    const t = controlTokens.get(name)
+    const m = t && /^\{([^}]+)\}$/.exec(String(t.value).trim())
+    if (!t) err(where(name), "is missing; the control set's components need it", "add the control family in the design system (the kit's template has its default values), then re-pull")
+    else if (!m || !typeStyles.has(m[1])) err(where(name), `is ${JSON.stringify(t.value)}, not a style in the type scale`, "alias a type style, such as {label-1}")
+  }
+  const h = (n) => parseFloat(controlTokens.get(n)?.value)
+  if (h("control-height-sm") >= h("control-height-md") || h("control-height-md") >= h("control-height-lg"))
+    err(where("control-height-*"), "aren't in order", "keep control-height-sm < control-height-md < control-height-lg")
+  // The families components read: present, each value of its kind, the breakpoints in order.
+  for (const [family, names] of Object.entries(REQUIRED_FAMILIES)) {
+    const have = new Map((tokens[family]?.tokens ?? []).map((t) => [t.name, t]))
+    for (const name of names) {
+      const t = have.get(name)
+      if (!t) { err(where(name), `is missing; the components need the ${family} family`, `add the ${family} family in the design system (the kit's template has its default values), then re-pull`); continue }
+      const v = String(t.value).trim()
+      if (family === "layer" ? !/^\d+$/.test(v) : !LENGTH.test(v)) err(where(name), `is ${JSON.stringify(t.value)}, not ${family === "layer" ? "a whole number (a z-index)" : "a length"}`, family === "layer" ? "use a number such as 50" : "use px or rem")
+    }
+  }
+  const bps = REQUIRED_FAMILIES.breakpoint.map((n) => (tokens.breakpoint?.tokens ?? []).find((t) => t.name === n)?.value).filter(Boolean)
+  if (bps.length === REQUIRED_FAMILIES.breakpoint.length) {
+    const units = new Set(bps.map((v) => /[a-z]+$/.exec(String(v).trim())?.[0]))
+    if (units.size > 1) err(where("breakpoint-*"), `mix units (${[...units].join(", ")})`, "give every breakpoint the same unit (rem, as Tailwind's): Tailwind sorts them by value")
+    else if (bps.some((v, i) => i && parseFloat(v) <= parseFloat(bps[i - 1]))) err(where("breakpoint-*"), "aren't in order", "keep sm < md < lg < xl < 2xl")
+  }
+  // More contrast: each override names a token that exists, and is an alias to one or a length.
+  const known = new Set(Object.values(tokens).flatMap((g) => (isObject(g) && Array.isArray(g.tokens) ? g.tokens.map((t) => t.name) : [])))
+  for (const [name, value] of Object.entries(tokens.contrastMore?.overrides ?? {})) {
+    const m = /^\{([^}]+)\}$/.exec(String(value).trim())
+    if (!known.has(name)) err(`${file} › contrastMore.${name}`, "isn't a token", "override an existing token, such as line-normal")
+    else if (m ? !known.has(m[1]) : !LENGTH.test(String(value).trim())) err(`${file} › contrastMore.${name}`, `is ${JSON.stringify(value)}`, "alias another token ({line-strong}) or give a length (3px)")
+    else if (m && m[1] === name) err(`${file} › contrastMore.${name}`, "aliases itself", "point it at a stronger token")
+  }
+  for (const g of tokens.type?.groups ?? []) {
+    for (const s of g.styles ?? []) if (s.mobileFontSize !== undefined && !LENGTH.test(String(s.mobileFontSize)))
+      err(`${file} › type.${s.name}`, `has mobileFontSize ${JSON.stringify(s.mobileFontSize)}`, "use a length such as 28px, or leave it out")
+  }
   for (const g of tokens.type?.groups ?? []) {
     if (!(g.family in (tokens.type.families ?? {}))) err(`${file} › type.groups.${g.name}`, `uses family "${g.family}", which type.families doesn't define`, "add the family or fix the name")
     for (const s of g.styles ?? []) if (!LENGTH.test(String(s.fontSize ?? "")))
@@ -597,7 +688,12 @@ function checkLayers(repo, err) {
   if (!cssRel || !existsSync(join(repo, cssRel))) return
   const postcss = loadPostcss(repo)
   if (!postcss) {
-    err("package postcss", "isn't installed, so the global CSS's layers can't be checked", "install it as a dev dependency (`pnpm add -D postcss@8.5.28`, or the repo's package manager) — Setup and the kit 0.21.0 upgrade add it")
+    // Declared but not loadable: the packages were never installed in this checkout, not a missing dependency.
+    const pkg = existsSync(join(repo, "package.json")) ? readJsonc(join(repo, "package.json")) : {}
+    if (pkg.dependencies?.postcss || pkg.devDependencies?.postcss)
+      err("package postcss", "is in package.json but not installed, so the global CSS's layers can't be checked", "install the repo's packages first (`pnpm install`, or the repo's package manager), then run this again")
+    else
+      err("package postcss", "isn't installed, so the global CSS's layers can't be checked", "install it as a dev dependency (`pnpm add -D postcss@8.5.28`, or the repo's package manager) — Setup and the kit 0.21.0 upgrade add it")
     return
   }
   let rules
@@ -641,8 +737,8 @@ export function installedVersion(app, name) {
   }
 }
 
-/** The frameworks this profile supports, and the package that marks each. */
-export const FRAMEWORKS = { next: "next", vite: "vite" }
+/** The frameworks this profile supports, and the package that marks each. Next.js was dropped in 0.30.0. */
+export const FRAMEWORKS = { vite: "vite" }
 
 /** The app's framework from its own package.json (pre-flight runs before there's a config). */
 export function detectFramework(app) {
@@ -650,6 +746,7 @@ export function detectFramework(app) {
   if (!existsSync(p)) return null
   const pkg = JSON.parse(readFileSync(p, "utf8"))
   const deps = { ...pkg.dependencies, ...pkg.devDependencies }
+  if ("next" in deps) return "next" // named, so pre-flight can say it's unsupported rather than unknown
   const found = Object.entries(FRAMEWORKS).filter(([, marker]) => marker in deps).map(([name]) => name)
   return found.length === 1 ? found[0] : null
 }
@@ -662,14 +759,15 @@ export function detectFramework(app) {
  */
 function checkTestedRange(repo, testedRange, err, framework, warn = err, notes = []) {
   const rangePath = testedRange ?? join(HERE, "tested-range.json")
-  if (!existsSync(rangePath)) { err("tested-range.json", "not found next to the scripts", "copy it from the kit with the scripts"); return }
+  // A repo carries only ds-validate.mjs (since kit 0.8.0): the version check runs from the plugin.
+  if (!existsSync(rangePath)) { err("tested-range.json", "isn't next to this ds-validate.mjs (a repo's copy has none: the version check runs from the plugin)", "run the plugin's: node <plugin>/kit/code/shadcn/scripts/ds-validate.mjs --repo . --preflight"); return }
   const range = JSON.parse(readFileSync(rangePath, "utf8"))
   let packages = range.packages
   if (range.frameworks) {
     const fw = framework ?? detectFramework(repo)
     if (!fw || !range.frameworks[fw]) {
-      err("framework", fw ? `is "${fw}", which this kit has no tested range for` : "can't be told from the app's package.json",
-        `this profile supports ${Object.keys(range.frameworks).join(" and ")} — the app's package.json must depend on exactly one of ${Object.values(FRAMEWORKS).join(", ")}`)
+      err("framework", fw === "next" ? "is Next.js, which the kit no longer supports (dropped in 0.30.0)" : fw ? `is "${fw}", which this kit has no tested range for` : "can't be told from the app's package.json",
+        `the kit supports ${Object.keys(range.frameworks).join(" and ")} — the app's package.json must depend on ${Object.values(FRAMEWORKS).join(", ")}`)
       return
     }
     packages = { ...range.packages, ...range.frameworks[fw] }
@@ -677,7 +775,8 @@ function checkTestedRange(repo, testedRange, err, framework, warn = err, notes =
   for (const [name, { min, max, required }] of Object.entries(packages)) {
     const v = installedVersion(repo, name)
     if (!v) {
-      if (required) err(`package ${name}`, "isn't installed", `install ${name}@${max}`)
+      // Not a finding before the code step, which adds it at its tested max.
+      if (required) notes.push(`package ${name} isn't installed yet — Setup's code step adds it at ${max}`)
       continue
     }
     if (compareVersions(v, min) >= 0 && compareVersions(v, max) <= 0) continue
@@ -718,11 +817,85 @@ export function validateTemplate(configPath, tokensPath) {
 }
 
 // ---------------------------------------------------------------------------
+// The design scope (--design-scope <base>)
+// ---------------------------------------------------------------------------
+
+/** The design entry's paths, as Setup installs it (code.md §4, "Design entry"). */
+export const DESIGN_ENTRY = ["design.html", "src/design/"]
+
+/**
+ * The paths a designer's `design/*` branch may change, relative to the app's
+ * folder: the token source and the token file (`.ttt/design-system.json` →
+ * `tokensIn`, `tokensOut`), the component folder (`components.json` →
+ * `aliases.ui`) and the design entry. A path ending in "/" is a folder.
+ * Throws when the config or the component folder can't be read.
+ */
+export function designPaths(repo) {
+  const configPath = join(repo, ".ttt/design-system.json")
+  if (!existsSync(configPath)) throw new Error(".ttt/design-system.json not found — run it in the app's folder, or pass --repo <app>")
+  const { tokensIn, tokensOut } = JSON.parse(readFileSync(configPath, "utf8"))
+  const ui = uiDir(repo)
+  if (!ui) throw new Error("components.json › aliases.ui doesn't resolve through tsconfig.json's paths, so the component folder is unknown")
+  const rel = (p) => relative(repo, resolve(repo, p)).split("\\").join("/")
+  return [tokensIn, tokensOut, `${rel(ui)}/`, ...DESIGN_ENTRY].filter(Boolean).map((p) => (p.endsWith("/") ? p : rel(p)))
+}
+
+/** Whether a path relative to the app's folder is one of `paths`. */
+export const inDesignScope = (file, paths) => paths.some((p) => (p.endsWith("/") ? file.startsWith(p) : file === p))
+
+/**
+ * Every file the branch changes since it left `base` (`git diff base...HEAD`,
+ * renames as a delete and an add, so both sides count) that is outside the
+ * design paths. Files are named from the git root, so a change outside the
+ * app's folder (a monorepo's root, another package) is named where it is.
+ * `{ outside, changed, paths, prefix }`; throws when git can't diff against `base`.
+ */
+export function designScope(repo, base) {
+  const git = (...a) => {
+    const r = spawnSync("git", ["-C", repo, ...a], { encoding: "utf8" })
+    if (r.status !== 0) throw new Error(`git ${a.join(" ")} failed: ${(r.stderr || r.error?.message || "").trim()}`)
+    return r.stdout
+  }
+  const prefix = git("rev-parse", "--show-prefix").trim()
+  git("rev-parse", "--verify", "--quiet", `${base}^{commit}`)
+  const changed = git("-c", "core.quotepath=off", "diff", "--name-only", "--no-renames", `${base}...HEAD`).split("\n").filter(Boolean)
+  const paths = designPaths(repo)
+  const outside = changed.filter((f) => !(f.startsWith(prefix) && inDesignScope(f.slice(prefix.length), paths)))
+  return { outside, changed, paths: paths.map((p) => prefix + p), prefix }
+}
+
+function mainDesignScope(repo, base) {
+  let result
+  try { result = designScope(repo, base) }
+  catch (e) {
+    console.log(`error    design scope: ${e.message}`)
+    console.log(`\nThe check needs the base branch fetched (in CI, a full clone or \`git fetch origin <base>\`) and the app's folder (--repo).`)
+    process.exit(2)
+  }
+  const { outside, changed, paths } = result
+  for (const f of outside) console.log(`outside  ${f}`)
+  if (outside.length) {
+    console.log(`\n${outside.length} of ${changed.length} changed file(s) are outside the design paths.`)
+    console.log("A design/* branch changes only the design paths:")
+    for (const p of paths) console.log(`  ${p}`)
+    console.log("For the dev: review these changes, move them to a dev branch, or merge knowingly. The designer isn't asked to fix this.")
+    process.exit(1)
+  }
+  console.log(`in scope — ${changed.length} changed file(s), all in the design paths (${paths.join(", ")})`)
+  process.exit(0)
+}
+
+// ---------------------------------------------------------------------------
 
 function main() {
   const args = process.argv.slice(2)
   const flag = (n) => { const i = args.indexOf(n); return i === -1 ? null : args[i + 1] }
   const repo = resolve(flag("--repo") ?? process.cwd())
+  if (args.includes("--design-scope")) {
+    const base = flag("--design-scope")
+    if (!base || base.startsWith("--")) { console.log("error    --design-scope needs the base ref, e.g. --design-scope origin/develop"); process.exit(2) }
+    return mainDesignScope(repo, base)
+  }
   const { errors, warnings, notes } = args.includes("--template")
     ? validateTemplate(resolve(flag("--template")), resolve(flag("--tokens")))
     : validate(repo, { preflight: args.includes("--preflight"), testedRange: flag("--tested-range"), system: flag("--system") && resolve(flag("--system")), tokens: flag("--tokens") && resolve(flag("--tokens")) })

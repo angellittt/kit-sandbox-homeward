@@ -1,8 +1,9 @@
-// design-system-kit 0.23.1 · profile shadcn · stock component (base-nova + baseline only)
+// design-system-kit 0.37.0 · profile shadcn · stock component (base-nova + baseline only)
 /**
  * Stock base-nova (shadcn 4.21.1, 2026-10-07) + TTT baseline:
  * - Accessible name `aria-label="breadcrumb"` -> `"Breadcrumb"`.
  * - Link gets `rounded-xs` so the global focus outline has a rounded shape.
+ * - Layer and icon tokens: icon sizes `size-3`/`3.5`/`4`/`5` -> `size-(--icon-xs|sm|md|lg)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).
  */
 import * as React from "react";
 import { mergeProps } from "@base-ui/react/merge-props";
@@ -90,7 +91,7 @@ function BreadcrumbSeparator({
       data-slot="breadcrumb-separator"
       role="presentation"
       aria-hidden="true"
-      className={cn("[&>svg]:size-3.5", className)}
+      className={cn("[&>svg]:size-(--icon-sm)", className)}
       {...props}
     >
       {children ?? <ChevronRightIcon />}
@@ -108,7 +109,7 @@ function BreadcrumbEllipsis({
       role="presentation"
       aria-hidden="true"
       className={cn(
-        "flex size-5 items-center justify-center [&>svg]:size-4",
+        "flex size-5 items-center justify-center [&>svg]:size-(--icon-md)",
         className,
       )}
       {...props}

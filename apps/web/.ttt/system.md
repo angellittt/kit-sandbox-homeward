@@ -9,7 +9,7 @@ How Homeward is set up. The rules every TTT design system follows live in the ki
 | **Code** | [angellittt/kit-sandbox-homeward](https://github.com/angellittt/kit-sandbox-homeward), app `apps/web` · config `.ttt/design-system.json` |
 | **Figma** | [Homeward — Design System](https://www.figma.com/design/bKpKPW0E8HLfmotzHOp9vv) · file key `bKpKPW0E8HLfmotzHOp9vv` · not yet published as a library |
 | **Tracker** | https://app.clickup.com/8593845/v/l/li/901115555981 |
-| **Components** | 38 implemented · 1 validated |
+| **Components** | 39 implemented · 0 validated |
 | **Guide** | [How to use the design system kit](https://claude.ai/artifact/CXAdV2SCptjbrijSaaUpPz): what Setup asks, and which command to run when, for designers and devs |
 
 **Homeward-specific choices** — client extensions, client-added ramps and decisions that differ from the profile, one line each.

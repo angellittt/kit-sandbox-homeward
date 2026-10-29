@@ -1,4 +1,4 @@
-<!-- design-system-kit 0.23.1 · profile shadcn · wiring: CLAUDE.md design-system section -->
+<!-- design-system-kit 0.37.0 · profile shadcn · wiring: CLAUDE.md design-system section -->
 
 # Design system
 
@@ -11,19 +11,30 @@ the CSS to taste. Deviations go to the tracker: https://app.clickup.com/8593845/
 ## Usage rules
 
 - **Use the stock component** from `@/components/ui`, with the props it has —
-  the kit's included (Table `density`, Card `variant`, Badge `tone`…; each
-  README lists them). A client extension needs a stated reason — a
-  capability neither offers. Don't fork a component to style it.
+  the kit's included (Table `density`, Card `variant`, Badge `tone`…; the
+  design system's component docs list them). A client extension needs a
+  stated reason — a capability neither offers. Don't fork a component to
+  style it.
 - **Components are code-owned, tokens are design-owned.** Token changes come
   down from the design system (`/ds-apply`); component changes are made
   here and published back (`/ds-sync push`). A component the library
   ships that the system lacks, or a new look for one, is proposed in the
   design system first (`/ds-change`), then built (`/ds-apply`).
 - **Screens and compositions are app code**, built from the components and
-  tokens; they never go in the design system.
+  tokens; they never go in the design system. They follow its **Patterns**
+  section (forms and validation; empty, loading and error states; confirm or
+  undo; alert, toast or dialog; navigation): depart from one only for a
+  reason stated in the task or PR.
 - **Errors pair an icon and a word with colour**, and are written as fixes
   ("Use at least 8 characters", not "Invalid"). Sentence case; no emoji.
 - Wrap anything that scales or slides in `motion-safe:`.
+- **A state shown only by a fill disappears in Windows high contrast mode**
+  (the OS paints every background Canvas). The kit's components are covered
+  (the global CSS's `@layer forced-colors`); a custom one that marks
+  selected, on or current by background alone adds a border or outline, or a
+  `forced-colors:` rule with system colours (`forced-colors:bg-[Highlight]`).
+
+### This project's usage rules
 
 None yet.
 
@@ -33,9 +44,10 @@ None yet.
   semantic token is a utility of the same name (`text-label-strong`,
   `bg-status-positive-soft`); text styles are `type-<style>`;
   `p-4` is `space-4`. No hex, no arbitrary colours (`bg-[#…]`), no default
-  palette classes (`bg-zinc-…`). Lint enforces it outside `@/components/ui`:
-  `design-system/no-raw-colour` errors, `design-system/no-arbitrary-size`
-  warns (`p-[18px]`). An exception is an `eslint-disable` comment with its
+  palette classes (`bg-zinc-…`: the token file turns the palette off, so they
+  style nothing). Lint enforces it outside `@/components/ui`:
+  `design-system/no-raw-colour` errors (a raw colour or a default palette
+  class), `design-system/no-arbitrary-size` warns (`p-[18px]`). An exception is an `eslint-disable` comment with its
   reason; a value the tokens keep missing is a token request to design.
 - **Naming clash:** shadcn's `secondary` and `accent` are neutral greys. The
   brand ones are `brand-secondary` and `brand-accent`.
@@ -59,12 +71,9 @@ locale only in that file).
 - **Loading buttons:** spinner, `disabled` and `aria-busy` together —
   `<Button disabled={saving} aria-busy={saving}>{saving && <Spinner />}Save</Button>`.
 
-None yet.
+### Agreed for this project
 
-**Superseded by stock — don't reintroduce:** `input.tsx`'s `InputGroup` (use
-`input-group.tsx`), `InputMessage` (`FieldDescription` / `FieldError`),
-`TableEmpty` (`TableCell colSpan` → `Empty`), Tabs `pill`/`underline`
-(`TabsList variant="default" | "line"`), Card `compact` (`size="sm"`).
+None yet.
 
 The design system's inventory says which components exist: `validated` ones are
 agreed but not in code yet — don't import them.

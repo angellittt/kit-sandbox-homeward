@@ -1,11 +1,15 @@
-// design-system-kit 0.23.1 · profile shadcn · stock component (base-nova + baseline only)
+// design-system-kit 0.37.0 · profile shadcn · stock component (base-nova + baseline only)
 /**
  * Stock base-nova (shadcn 4.21.1, 2026-10-07) + TTT baseline:
  * - Radius roles (D1): chips `rounded-lg` -> `rounded-sm` (text field; ComboboxInput gets it from InputGroup); items `rounded-md` -> `rounded-inset` (nested in the `rounded-lg` popup's `p-1` list).
  * - Label role (D2): ComboboxChipsInput gets `placeholder:text-label-assistive`.
+ * - ComboboxChip's remove button gets a name: `aria-label` "Remove <chip text>" when the chip's children are a string, else "Remove"; `removeLabel` overrides it (stock's icon-only button had none).
+ * - ComboboxInput's dropdown trigger gets a name: `aria-label` "Show options"; `triggerLabel` overrides it (stock's icon-only button had none).
  * - Popup hairline `ring-1 ring-foreground/10` -> `border border-border`.
  * - Popup open/close animations wrapped in `motion-safe:`.
  * - Keeps stock's border + ring focus treatment on the text fields.
+ * - Control tokens: the chips field's `min-h-8` -> `control-height-md`, padding `px-2.5` -> `control-padding-x`, text `text-sm` -> `control-label-md` (ComboboxInput takes them from InputGroup; the list's items keep `text-sm`), so the control set's density and text are token changes. Variable forms (`h-(--control-height-md)`, `text-(length:--control-label-md-size)`), so tailwind-merge still lets a call site's `h-10` or `text-lg` replace them.
+ * - Layer and icon tokens: overlays' `z-50` -> `z-(--layer-overlay)`, icon sizes `size-3`/`3.5`/`4`/`5` -> `size-(--icon-xs|sm|md|lg)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).
  */
 "use client";
 
@@ -36,11 +40,14 @@ function ComboboxTrigger({
   return (
     <ComboboxPrimitive.Trigger
       data-slot="combobox-trigger"
-      className={cn("[&_svg:not([class*='size-'])]:size-4", className)}
+      className={cn(
+        "[&_svg:not([class*='size-'])]:size-(--icon-md)",
+        className,
+      )}
       {...props}
     >
       {children}
-      <ChevronDownIcon className="pointer-events-none size-4 text-muted-foreground" />
+      <ChevronDownIcon className="pointer-events-none size-(--icon-md) text-muted-foreground" />
     </ComboboxPrimitive.Trigger>
   );
 }
@@ -64,10 +71,12 @@ function ComboboxInput({
   disabled = false,
   showTrigger = true,
   showClear = false,
+  triggerLabel = "Show options",
   ...props
 }: ComboboxPrimitive.Input.Props & {
   showTrigger?: boolean;
   showClear?: boolean;
+  triggerLabel?: string;
 }) {
   return (
     <InputGroup className={cn("w-auto", className)}>
@@ -82,6 +91,7 @@ function ComboboxInput({
             variant="ghost"
             render={<ComboboxTrigger />}
             data-slot="input-group-button"
+            aria-label={triggerLabel}
             className="group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent"
             disabled={disabled}
           />
@@ -114,7 +124,7 @@ function ComboboxContent({
         align={align}
         alignOffset={alignOffset}
         anchor={anchor}
-        className="isolate z-50"
+        className="isolate z-(--layer-overlay)"
       >
         <ComboboxPrimitive.Popup
           data-slot="combobox-content"
@@ -152,7 +162,7 @@ function ComboboxItem({
     <ComboboxPrimitive.Item
       data-slot="combobox-item"
       className={cn(
-        "relative flex w-full cursor-default items-center gap-2 rounded-inset py-1 pr-8 pl-1.5 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground not-data-[variant=destructive]:data-highlighted:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative flex w-full cursor-default items-center gap-2 rounded-inset py-1 pr-8 pl-1.5 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground not-data-[variant=destructive]:data-highlighted:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-(--icon-md)",
         className,
       )}
       {...props}
@@ -233,7 +243,7 @@ function ComboboxChips({
     <ComboboxPrimitive.Chips
       data-slot="combobox-chips"
       className={cn(
-        "flex min-h-8 flex-wrap items-center gap-1 rounded-sm border border-input bg-transparent bg-clip-padding px-2.5 py-1 text-sm transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 has-aria-invalid:border-destructive has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/20 has-data-[slot=combobox-chip]:px-1 dark:bg-input/30 dark:has-aria-invalid:border-destructive/50 dark:has-aria-invalid:ring-destructive/40",
+        "flex min-h-(--control-height-md) flex-wrap items-center gap-1 rounded-sm border border-input bg-transparent bg-clip-padding px-(--control-padding-x) py-1 text-(length:--control-label-md-size) leading-(--control-label-md-leading) tracking-(--control-label-md-tracking) transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 has-aria-invalid:border-destructive has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/20 has-data-[slot=combobox-chip]:px-1 dark:bg-input/30 dark:has-aria-invalid:border-destructive/50 dark:has-aria-invalid:ring-destructive/40",
         className,
       )}
       {...props}
@@ -245,9 +255,11 @@ function ComboboxChip({
   className,
   children,
   showRemove = true,
+  removeLabel = typeof children === "string" ? `Remove ${children}` : "Remove",
   ...props
 }: ComboboxPrimitive.Chip.Props & {
   showRemove?: boolean;
+  removeLabel?: string;
 }) {
   return (
     <ComboboxPrimitive.Chip
@@ -264,6 +276,7 @@ function ComboboxChip({
           render={<Button variant="ghost" size="icon-xs" />}
           className="-ml-1 opacity-50 hover:opacity-100"
           data-slot="combobox-chip-remove"
+          aria-label={removeLabel}
         >
           <XIcon className="pointer-events-none" />
         </ComboboxPrimitive.ChipRemove>
