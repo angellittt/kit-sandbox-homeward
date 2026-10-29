@@ -169,18 +169,12 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.4(react@19.2.4)
-      shadcn:
-        specifier: 4.21.0
-        version: 4.21.0(typescript@5.9.3)
       sonner:
         specifier: 2.0.8
         version: 2.0.8(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       tailwindcss:
         specifier: 4.3.3
         version: 4.3.3
-      tw-animate-css:
-        specifier: 1.4.0
-        version: 1.4.0
       zod:
         specifier: ^4.3.6
         version: 4.4.3
@@ -242,6 +236,12 @@ importers:
       postcss:
         specifier: 8.5.28
         version: 8.5.28
+      shadcn:
+        specifier: 4.21.0
+        version: 4.21.0(typescript@5.9.3)
+      tw-animate-css:
+        specifier: 1.4.0
+        version: 1.4.0
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
@@ -6923,7 +6923,7 @@ snapshots:
       magicast: 0.5.2
       obug: 2.1.1
       tinyrainbow: 3.1.1
-      vitest: 4.1.11(@types/node@24.10.15)(@vitest/coverage-istanbul@4.1.11)(@vitest/ui@4.1.11)(jsdom@28.1.0)(vite@7.3.6(@types/node@24.10.15)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.23.15)(yaml@2.9.0))
+      vitest: 4.1.11(@types/node@25.3.2)(@vitest/coverage-istanbul@4.1.11)(@vitest/ui@4.1.11)(jsdom@28.1.0)(vite@7.3.6(@types/node@25.3.2)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.23.15)(yaml@2.9.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -6995,7 +6995,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.1.1
-      vitest: 4.1.11(@types/node@24.10.15)(@vitest/coverage-istanbul@4.1.11)(@vitest/ui@4.1.11)(jsdom@28.1.0)(vite@7.3.6(@types/node@24.10.15)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.23.15)(yaml@2.9.0))
+      vitest: 4.1.11(@types/node@25.3.2)(@vitest/coverage-istanbul@4.1.11)(@vitest/ui@4.1.11)(jsdom@28.1.0)(vite@7.3.6(@types/node@25.3.2)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.23.15)(yaml@2.9.0))
 
   '@vitest/utils@4.1.11':
     dependencies:
