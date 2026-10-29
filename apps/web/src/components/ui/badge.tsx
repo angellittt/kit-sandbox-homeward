@@ -1,11 +1,12 @@
-// design-system-kit 0.23.1 · profile shadcn · kit extension (replaces the stock file)
+// design-system-kit 0.37.0 · profile shadcn · kit extension (replaces the stock file)
 /**
  * Stock base-nova (shadcn 4.21.1, 2026-10-07) + TTT baseline:
  * - Badge: focus ring utilities (incl. destructive's focus ring tint) removed in favour of the global :focus-visible rule.
  * - Badge: a link badge's hover `[a]:hover:bg-primary/80` -> `[a]:hover:bg-primary-strong` (the hover for primary-normal, as Button's).
  * + TTT kit extensions:
- * - tone neutral | primary | secondary | accent | positive | cautionary | negative (Semantic colour): sets --t-soft/--t-text/--t-solid/--t-on; data-tone.
+ * - tone neutral | primary | secondary | accent | info | positive | cautionary | negative (Semantic colour): sets --t-soft/--t-text/--t-solid/--t-on; data-tone.
  * - variant gains soft | solid, which read the tone's --t-* values. A tone with no variant renders soft; stock variants are unchanged and ignore tone.
+ * - Layer and icon tokens: icon sizes `size-3`/`3.5`/`4`/`5` -> `size-(--icon-xs|sm|md|lg)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).
  */
 import * as React from "react";
 import { mergeProps } from "@base-ui/react/merge-props";
@@ -14,7 +15,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "cn";
 
 const badgeVariants = cva(
-  "group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-4xl border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3!",
+  "group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-4xl border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-(--icon-xs)!",
   {
     variants: {
       variant: {
@@ -41,6 +42,7 @@ const badgeVariants = cva(
           "[--t-soft:var(--secondary-soft)] [--t-text:var(--secondary-text)] [--t-solid:var(--secondary-normal)] [--t-on:var(--on-secondary)]",
         accent:
           "[--t-soft:var(--accent-soft)] [--t-text:var(--accent-text)] [--t-solid:var(--accent-normal)] [--t-on:var(--on-accent)]",
+        info: "[--t-soft:var(--status-info-soft)] [--t-text:var(--status-info)] [--t-solid:var(--status-info)] [--t-on:var(--background-normal)]",
         positive:
           "[--t-soft:var(--status-positive-soft)] [--t-text:var(--status-positive)] [--t-solid:var(--status-positive)] [--t-on:var(--background-normal)]",
         cautionary:

@@ -1,11 +1,12 @@
-// design-system-kit 0.23.1 · profile shadcn · stock component (base-nova + baseline only)
+// design-system-kit 0.37.0 · profile shadcn · stock component (base-nova + baseline only)
 /**
  * Stock base-nova (shadcn 4.21.1, 2026-10-07) + TTT baseline:
  * - Props typed as `React.ComponentProps<typeof InputPrimitive>` (the Base UI primitive actually rendered).
  * - Radius role (D1): `rounded-lg` -> `rounded-sm` (text field).
  * - Label role (D2): `placeholder:text-muted-foreground` -> `placeholder:text-label-assistive`.
  * - Keeps stock's border + ring focus treatment.
- * - Client (design tweak, 2026-10-19): `h-8` -> `h-10` (text fields 40px tall, with InputGroup).
+ * - Control tokens: height `h-8` -> `control-height-md`, padding `px-2.5` -> `control-padding-x`, `md:text-sm` -> `control-label-md` from md (below it stock's `text-base` stays, so phones don't zoom on focus), so the control set's density and text are token changes. Variable forms (`h-(--control-height-md)`, `text-(length:--control-label-md-size)`), so tailwind-merge still lets a call site's `h-10` or `text-lg` replace them.
+ * - Client (design tweak, 2026-10-19): `h-10`; since kit 0.37.0 the height is `control-height-md` (36px, design's Comfortable controls), so the class takes the kit's variable form.
  */
 import * as React from "react";
 import { Input as InputPrimitive } from "@base-ui/react/input";
@@ -21,7 +22,7 @@ function Input({
       type={type}
       data-slot="input"
       className={cn(
-        "h-10 w-full min-w-0 rounded-sm border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-label-assistive focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+        "h-(--control-height-md) w-full min-w-0 rounded-sm border border-input bg-transparent px-(--control-padding-x) py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-label-assistive focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-(length:--control-label-md-size) md:leading-(--control-label-md-leading) md:tracking-(--control-label-md-tracking) dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
         className,
       )}
       {...props}

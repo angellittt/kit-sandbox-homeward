@@ -1,4 +1,4 @@
-// design-system-kit 0.23.1 · profile shadcn · stock component (base-nova + baseline only)
+// design-system-kit 0.37.0 · profile shadcn · stock component (base-nova + baseline only)
 "use client";
 
 /**
@@ -6,6 +6,7 @@
  * - `locale` defaults to `appLocale` and new `weekStartsOn` defaults to `appWeekStartsOn` (the app's locale defaults, `@/lib/locale`).
  * - Focused day: `group-data-[focused=true]/day:border-ring ring-[3px] ring-ring/50` removed; the day is a Button and takes the global focus rule (two rings otherwise).
  * - Disabled days: `text-muted-foreground opacity-50` -> `text-label-disable opacity-100` (disabled label role).
+ * - Layer and icon tokens: icon sizes `size-3`/`3.5`/`4`/`5` -> `size-(--icon-xs|sm|md|lg)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).
  */
 
 import * as React from "react";
@@ -102,7 +103,7 @@ function Calendar({
           "font-medium select-none",
           captionLayout === "label"
             ? "text-sm"
-            : "flex items-center gap-1 rounded-(--cell-radius) text-sm [&>svg]:size-3.5 [&>svg]:text-muted-foreground",
+            : "flex items-center gap-1 rounded-(--cell-radius) text-sm [&>svg]:size-(--icon-sm) [&>svg]:text-muted-foreground",
           defaultClassNames.caption_label,
         ),
         month_grid: cn("w-full border-collapse", defaultClassNames.month_grid),

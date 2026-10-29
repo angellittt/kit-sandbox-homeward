@@ -1,4 +1,4 @@
-// design-system-kit 0.23.1 · profile shadcn · kit extension (replaces the stock file)
+// design-system-kit 0.37.0 · profile shadcn · kit extension (replaces the stock file)
 "use client";
 
 /**
@@ -9,6 +9,7 @@
  * - Error icon (candidate, profile capability "Error icon"): FieldError always
  *   renders an alert icon (`aria-hidden`) before the message, so an error
  *   never relies on colour alone.
+ * - Layer and icon tokens: icon sizes `size-3`/`3.5`/`4`/`5` -> `size-(--icon-xs|sm|md|lg)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).
  */
 
 import { useMemo } from "react";
@@ -236,7 +237,7 @@ function FieldError({
     >
       <CircleAlertIcon
         aria-hidden
-        className="size-4 shrink-0 translate-y-0.5"
+        className="size-(--icon-md) shrink-0 translate-y-0.5"
       />
       <div className="min-w-0 flex-1">{content}</div>
     </div>

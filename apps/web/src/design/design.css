@@ -1,0 +1,92 @@
+/* design-system-kit 0.37.0 · profile shadcn · design entry: the shell's styles
+   Layout for the design entry only, from the tokens; in a layer, so the
+   components' utilities still win. .row, .col and .note are the design
+   system cards' own helpers, which the pages use as the cards do. */
+@layer components {
+  body {
+    margin: 0;
+    background: var(--background-normal);
+    color: var(--label-normal);
+    font-family: var(--font-sans);
+  }
+  .ds-shell {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 100vh;
+  }
+  .ds-nav {
+    border-right: 1px solid var(--line-normal);
+    padding: 16px 12px;
+    overflow-y: auto;
+    max-height: 100vh;
+    position: sticky;
+    top: 0;
+  }
+  .ds-nav h2 {
+    margin: 16px 8px 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--label-alternative);
+  }
+  .ds-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .ds-nav a {
+    display: block;
+    padding: 4px 8px;
+    border-radius: var(--radius-md);
+    color: var(--label-normal);
+    font-size: 14px;
+    text-decoration: none;
+  }
+  .ds-nav a:hover {
+    background: var(--fill-normal);
+  }
+  .ds-nav a[aria-current="page"] {
+    background: var(--fill-strong);
+    font-weight: 500;
+  }
+  .ds-main {
+    min-width: 0;
+  }
+  .ds-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--line-normal);
+  }
+  .ds-header h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .ds-theme {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .ds-page {
+    padding: 24px;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 420px;
+  }
+  .note {
+    margin: 0;
+    font-size: 12px;
+    color: var(--label-alternative);
+  }
+}

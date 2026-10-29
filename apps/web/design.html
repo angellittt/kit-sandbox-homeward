@@ -1,0 +1,35 @@
+<!doctype html>
+<!-- design-system-kit 0.37.0 · profile shadcn · design entry: the page
+     Every component as the design system shows it, on the app's own CSS and
+     components, and none of the app's startup (router, auth, data, env check).
+     Vite's dev server serves it at /design.html; `vite build` builds only
+     index.html, so it never ships unless a build asks for it (build:design). -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Design system</title>
+    <script>
+      (() => {
+        // The design entry's own key (shell.tsx, THEME_KEY), so Wireframe never reaches the app.
+        let theme = "system";
+        try {
+          theme = localStorage.getItem("design-theme") ?? theme;
+        } catch {
+          // Storage blocked: follow the system.
+        }
+        if (theme !== "light" && theme !== "dark" && theme !== "wireframe")
+          theme = matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme =
+          theme === "dark" ? "dark" : "light";
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/design/main.tsx"></script>
+  </body>
+</html>

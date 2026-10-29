@@ -2,8 +2,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Design-system tokens — GENERATED from .ttt/tokens.json by
- * scripts/ds-tokens.mjs. Every token, the shadcn variables that alias them,
+/* Design-system tokens — GENERATED from .ttt/tokens.json by the
+ * design-system-kit plugin's ds-tokens.mjs. Every token, the shadcn variables that alias them,
  * the Tailwind @theme mapping and the type classes. Never edit by hand. */
 @import "../styles/ds-tokens.css";
 /* The app's fonts (app-owned), unlayered, after the token file. */
@@ -86,6 +86,8 @@
   }
 }
 
+/* design-system-kit 0.37.0 · profile shadcn · wiring: theme block */
+
 /* Automatic source detection walks up from this file and can miss the
  * source directory (or scan markdown). Declare the scan root explicitly. */
 @source "../";
@@ -103,11 +105,124 @@
     @apply bg-background text-foreground font-sans;
   }
 
-  /* One focus treatment for every focusable control: a 2px solid ring with a
-   * 2px offset (design-system-kit focus rule). Don't add `outline-none` to a
-   * focusable control; text fields keep stock's border + ring treatment. */
+  /* design-system-kit 0.37.0 · profile shadcn · wiring: focus rule */
+  /* One focus treatment for every focusable control: a solid ring
+   * `focus-ring-width` wide (2px), `focus-ring-offset` away (2px), both tokens. Components don't carry their own focus-visible outline or ring
+   * utilities; where a parent clips the outline they set only an inset offset
+   * (`focus-visible:-outline-offset-2`).
+   *
+   * Don't add `outline-none` to a focusable control: in Tailwind v4 it sets
+   * --tw-outline-style: none, and the ring then renders with style none.
+   * Text fields keep stock's border + ring treatment, which replaces it.
+   */
   :focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
+    outline: var(--focus-ring-width, 2px) solid var(--ring);
+    outline-offset: var(--focus-ring-offset, 2px);
+  }
+}
+
+/* design-system-kit 0.37.0 · profile shadcn · wiring: forced colors (Windows high contrast) */
+/* In forced-colors mode the OS replaces every colour with the person's own
+ * high-contrast theme: backgrounds become Canvas, so a state shown only by a
+ * fill disappears — the selected tab, a switch's on, a slider's range, a
+ * progress bar, a highlighted menu item. These rules give each one a system
+ * colour, which the OS keeps: Highlight / HighlightText for what's selected,
+ * on or under the pointer, CanvasText for tracks, bars and dividers. They use
+ * only system colours, so they follow whatever theme the person chose.
+ *
+ * Borders and outlines survive on their own (the OS paints them), and so
+ * does the focus outline. Rules key on data-slot and the state attributes
+ * Base UI sets, so they need nothing in the components.
+ *
+ * Its own cascade layer, declared after Tailwind's (theme, base, components,
+ * utilities), so it beats the components' state utilities
+ * (`data-active:bg-background`) without being unlayered CSS, which beats
+ * everything and which ds-validate flags.
+ */
+@layer forced-colors {
+  @media (forced-colors: active) {
+    /* Selected, pressed, current and highlighted: the system's selection colours. */
+    [data-slot="tabs-trigger"][data-active],
+    [data-slot="toggle"][aria-pressed="true"],
+    [data-slot="toggle-group-item"][aria-pressed="true"],
+    [data-slot="sidebar-menu-button"][data-active],
+    [data-slot="dropdown-menu-item"][data-highlighted],
+    [data-slot="dropdown-menu-checkbox-item"][data-highlighted],
+    [data-slot="dropdown-menu-radio-item"][data-highlighted],
+    [data-slot="dropdown-menu-sub-trigger"][data-highlighted],
+    [data-slot="select-item"][data-highlighted],
+    [data-slot="combobox-item"][data-highlighted],
+    [data-slot="calendar"] [data-selected-single="true"],
+    [data-slot="calendar"] [data-range-start="true"],
+    [data-slot="calendar"] [data-range-end="true"] {
+      forced-color-adjust: none;
+      background-color: Highlight;
+      color: HighlightText;
+    }
+
+    /* Checked boxes and radios: filled with the selection colour, the tick or dot in its text colour. */
+    [data-slot="checkbox"][data-checked],
+    [data-slot="checkbox"][data-indeterminate],
+    [data-slot="radio-group-item"][data-checked] {
+      forced-color-adjust: none;
+      background-color: Highlight;
+      border-color: Highlight;
+      color: HighlightText;
+    }
+    [data-slot="radio-group-indicator"] > * {
+      forced-color-adjust: none;
+      background-color: HighlightText;
+    }
+
+    /* Switch: a track in the text colour's outline, filled when on; the thumb always visible. */
+    [data-slot="switch"] {
+      forced-color-adjust: none;
+      background-color: Canvas;
+      border: 1px solid CanvasText;
+    }
+    [data-slot="switch"][data-checked] {
+      background-color: Highlight;
+      border-color: Highlight;
+    }
+    [data-slot="switch-thumb"] {
+      forced-color-adjust: none;
+      background-color: CanvasText;
+    }
+    [data-slot="switch"][data-checked] [data-slot="switch-thumb"] {
+      background-color: HighlightText;
+    }
+
+    /* Slider and Progress: the track outlined, the filled part in the selection colour. */
+    [data-slot="slider-track"],
+    [data-slot="progress-track"] {
+      forced-color-adjust: none;
+      background-color: Canvas;
+      outline: 1px solid CanvasText;
+    }
+    [data-slot="slider-range"],
+    [data-slot="progress-indicator"] {
+      forced-color-adjust: none;
+      background-color: Highlight;
+    }
+    [data-slot="slider-thumb"] {
+      forced-color-adjust: none;
+      background-color: Canvas;
+      border: 2px solid CanvasText;
+    }
+
+    /* Dividers drawn as a filled line. */
+    [data-slot="separator"],
+    [data-slot="dropdown-menu-separator"],
+    [data-slot="select-separator"],
+    [data-slot="combobox-separator"],
+    [data-slot="sidebar-separator"] {
+      forced-color-adjust: none;
+      background-color: CanvasText;
+    }
+
+    /* A loading placeholder keeps its shape. */
+    [data-slot="skeleton"] {
+      outline: 1px dashed GrayText;
+    }
   }
 }
