@@ -20,6 +20,11 @@ permissions:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    # Preloop (in mise.toml) is for running workflows locally, not in CI. Set
+    # for the whole job, not just mise-action: the terraform:* scripts run
+    # `mise x --`, which installs every pinned tool it isn't told to skip.
+    env:
+      MISE_DISABLE_TOOLS: github:preloopdev/preloop
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
@@ -28,10 +33,7 @@ jobs:
           persist-credentials: false
 
       # Installs Node, pnpm and Terraform at the versions pinned in mise.toml.
-      # Preloop (also in mise.toml) is for running workflows locally, not in CI.
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
-        env:
-          MISE_DISABLE_TOOLS: github:preloopdev/preloop
 
       - name: Check formatting
         run: pnpm terraform:fmt

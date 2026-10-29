@@ -1,7 +1,7 @@
 # design-system-kit 0.37.0 · profile shadcn · wiring (CI): GitHub Actions, design branches
 #
-# Setup copies this to .github/workflows/design.yml with apps/web filled: the
-# app's folder from the repo root (`apps/web` in the starter template, `.` in a
+# Setup copies this to .github/workflows/design.yml with the app's folder from
+# the repo root filled in (`apps/web` in the starter template, `.` in a
 # single-package repo). Two jobs, both only for a designer's design/* branch:
 #
 # - scope: on the PR, `ds-validate --design-scope` fails when the branch changes
