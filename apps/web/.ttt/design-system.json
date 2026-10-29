@@ -4,18 +4,12 @@
   "schema": "ttt-ds/1",
   "profile": "shadcn",
   "framework": "vite",
-  "kitVersion": "0.23.1",
+  "kitVersion": "0.37.0",
   "tokensIn": ".ttt/tokens.json",
   "systemIn": ".ttt/system.md",
   "tokensOut": "src/styles/ds-tokens.css",
   "lastSynced": "2026-10-29T23:31:55Z",
   "typeClassPrefix": "type-",
-  "namespace": "Homeward",
-  "bundleExtras": {
-    "sonner": [
-      "toast"
-    ]
-  },
   "componentFiles": {
     "DatePicker": [
       "date-picker.tsx",
