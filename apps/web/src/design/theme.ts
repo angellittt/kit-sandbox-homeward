@@ -1,4 +1,4 @@
-// design-system-kit 0.37.0 · profile shadcn · design entry: the themes
+// design-system-kit 0.37.1 · profile shadcn · design entry: the themes
 //
 // The shell's theme switch. Wireframe is the design system's design-only
 // theme: main.tsx loads its tokens (themes.css) for the design entry only,

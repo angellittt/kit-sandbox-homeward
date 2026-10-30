@@ -86,7 +86,7 @@
   }
 }
 
-/* design-system-kit 0.37.0 · profile shadcn · wiring: theme block */
+/* design-system-kit 0.37.1 · profile shadcn · wiring: theme block */
 
 /* Automatic source detection walks up from this file and can miss the
  * source directory (or scan markdown). Declare the scan root explicitly. */
@@ -105,7 +105,7 @@
     @apply bg-background text-foreground font-sans;
   }
 
-  /* design-system-kit 0.37.0 · profile shadcn · wiring: focus rule */
+  /* design-system-kit 0.37.1 · profile shadcn · wiring: focus rule */
   /* One focus treatment for every focusable control: a solid ring
    * `focus-ring-width` wide (2px), `focus-ring-offset` away (2px), both tokens. Components don't carry their own focus-visible outline or ring
    * utilities; where a parent clips the outline they set only an inset offset
@@ -121,7 +121,7 @@
   }
 }
 
-/* design-system-kit 0.37.0 · profile shadcn · wiring: forced colors (Windows high contrast) */
+/* design-system-kit 0.37.1 · profile shadcn · wiring: forced colors (Windows high contrast) */
 /* In forced-colors mode the OS replaces every colour with the person's own
  * high-contrast theme: backgrounds become Canvas, so a state shown only by a
  * fill disappears — the selected tab, a switch's on, a slider's range, a

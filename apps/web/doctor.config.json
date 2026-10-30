@@ -47,6 +47,10 @@
         "rules": ["react/set-state-in-effect"]
       },
       {
+        "files": ["src/design/**"],
+        "rules": ["react-doctor/anchor-target-exists"]
+      },
+      {
         "files": ["scripts/**"]
       }
     ]

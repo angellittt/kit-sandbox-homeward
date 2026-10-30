@@ -1,4 +1,4 @@
-// design-system-kit 0.37.0 · profile shadcn · design entry: the shell
+// design-system-kit 0.37.1 · profile shadcn · design entry: the shell
 //
 // The page list by group on the left, one component on the right (#<slug> in
 // the address, so a link or the agent can open one directly), and the theme
@@ -15,7 +15,15 @@ const subscribe = (onChange: () => void) => {
   window.addEventListener("hashchange", onChange);
   return () => window.removeEventListener("hashchange", onChange);
 };
-const currentSlug = () => decodeURIComponent(window.location.hash.slice(1));
+const currentSlug = () => {
+  const hash = window.location.hash.slice(1);
+  try {
+    return decodeURIComponent(hash);
+  } catch {
+    // A malformed hash (`#100%`) would throw during render and blank the page.
+    return hash;
+  }
+};
 
 export const DesignShell = () => {
   const slug = useSyncExternalStore(subscribe, currentSlug, () => "");

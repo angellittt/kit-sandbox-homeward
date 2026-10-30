@@ -1,4 +1,4 @@
-// design-system-kit 0.37.0 · profile shadcn · design entry: the Popover page
+// design-system-kit 0.37.1 · profile shadcn · design entry: the Popover page
 import { Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
