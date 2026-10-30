@@ -8,7 +8,7 @@
   "tokensIn": ".ttt/tokens.json",
   "systemIn": ".ttt/system.md",
   "tokensOut": "src/styles/ds-tokens.css",
-  "lastSynced": "2026-10-30T04:58:54Z",
+  "lastSynced": "2026-10-30T07:38:22Z",
   "typeClassPrefix": "type-",
   "componentFiles": {
     "DatePicker": [
