@@ -1,4 +1,4 @@
-# design-system-kit 0.37.5 · profile shadcn · wiring (CI): GitHub Actions, design branches
+# design-system-kit 0.38.0 · profile shadcn · wiring (CI): GitHub Actions, design branches
 #
 # Setup copies this to .github/workflows/design.yml with the app's folder from
 # the repo root filled in (`apps/web` in the starter template, `.` in a

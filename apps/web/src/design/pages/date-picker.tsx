@@ -1,4 +1,4 @@
-// design-system-kit 0.37.5 · profile shadcn · design entry: the DatePicker page
+// design-system-kit 0.38.0 · profile shadcn · design entry: the DatePicker page
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { DatePicker, hintFor } from "@/components/ui/date-picker";

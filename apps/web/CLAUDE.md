@@ -1,4 +1,4 @@
-<!-- design-system-kit 0.37.5 · profile shadcn · wiring: CLAUDE.md design-system section -->
+<!-- design-system-kit 0.38.0 · profile shadcn · wiring: CLAUDE.md design-system section -->
 
 # Design system
 
