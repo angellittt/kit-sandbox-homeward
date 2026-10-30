@@ -1,4 +1,4 @@
-// design-system-kit 0.37.3 · profile shadcn · stock component (base-nova + baseline only)
+// design-system-kit 0.37.4 · profile shadcn · stock component (base-nova + baseline only)
 /**
  * TTT baseline:
  * - Layer and icon tokens: icon sizes `size-3`/`3.5`/`4`/`5` -> `size-(--icon-xs|sm|md|lg)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).

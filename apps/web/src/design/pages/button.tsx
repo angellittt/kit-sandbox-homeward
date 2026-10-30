@@ -1,4 +1,4 @@
-// design-system-kit 0.37.3 · profile shadcn · design entry: the Button page
+// design-system-kit 0.37.4 · profile shadcn · design entry: the Button page
 import { Copy, Ellipsis, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";

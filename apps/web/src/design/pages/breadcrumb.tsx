@@ -1,4 +1,4 @@
-// design-system-kit 0.37.3 · profile shadcn · design entry: the Breadcrumb page
+// design-system-kit 0.37.4 · profile shadcn · design entry: the Breadcrumb page
 import {
   Breadcrumb,
   BreadcrumbEllipsis,
