@@ -6,6 +6,7 @@
  * - Name: `aria-label` also goes to each thumb (Base UI leaves it on the Root's `role=group`, so the thumbs' range inputs had no name; `aria-labelledby` and a `FieldLabel` already reach them), and `getAriaLabel` / `getAriaValueText` pass through to the thumbs, to name a range's thumbs apart and give the value a unit.
  * - Thumbs: a number `value` or `defaultValue` renders one thumb (stock counts thumbs only from an array, so `defaultValue={30}` rendered two, as if no value were given); `[min, max]` stays for neither.
  * - Focus: thumb `focus-visible:ring-3 focus-visible:outline-hidden` -> `has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring` (keyboard focus lands on the thumb's visually hidden range input, so the global rule alone draws nothing visible).
+ * - Client (design tweak, 2026-10-30): thicker — track `h-1` / `w-1` -> `h-2` / `w-2` (4 → 8px); thumb `size-3` -> `size-4` (12 → 16px), so it still stands out from the track.
  */
 import { Slider as SliderPrimitive } from "@base-ui/react/slider";
 import { cn } from "cn";
@@ -47,7 +48,7 @@ function Slider({
       >
         <SliderPrimitive.Track
           data-slot="slider-track"
-          className="relative grow overflow-hidden rounded-full bg-muted select-none data-horizontal:h-1 data-horizontal:w-full data-vertical:h-full data-vertical:w-1"
+          className="relative grow overflow-hidden rounded-full bg-muted select-none data-horizontal:h-2 data-horizontal:w-full data-vertical:h-full data-vertical:w-2"
         >
           <SliderPrimitive.Indicator
             data-slot="slider-range"
@@ -61,7 +62,7 @@ function Slider({
             aria-label={ariaLabel}
             getAriaLabel={getAriaLabel}
             getAriaValueText={getAriaValueText}
-            className="relative block size-3 shrink-0 rounded-full border border-ring bg-thumb-normal ring-ring/50 transition-[color,box-shadow] select-none after:absolute after:-inset-2 hover:ring-3 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring active:ring-3 disabled:pointer-events-none disabled:opacity-50"
+            className="relative block size-4 shrink-0 rounded-full border border-ring bg-thumb-normal ring-ring/50 transition-[color,box-shadow] select-none after:absolute after:-inset-2 hover:ring-3 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring active:ring-3 disabled:pointer-events-none disabled:opacity-50"
           />
         ))}
       </SliderPrimitive.Control>
