@@ -1,4 +1,4 @@
-// design-system-kit 0.37.1 · profile shadcn · design entry: the Sidebar page
+// design-system-kit 0.37.2 · profile shadcn · design entry: the Sidebar page
 import { House, Settings, Users } from "lucide-react";
 import {
   Sidebar,

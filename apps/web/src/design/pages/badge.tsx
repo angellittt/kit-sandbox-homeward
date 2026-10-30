@@ -1,4 +1,4 @@
-// design-system-kit 0.37.1 · profile shadcn · design entry: the Badge page
+// design-system-kit 0.37.2 · profile shadcn · design entry: the Badge page
 import { Badge } from "@/components/ui/badge";
 
 export const BadgePreview = () => {

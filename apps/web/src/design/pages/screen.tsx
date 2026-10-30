@@ -1,4 +1,4 @@
-// design-system-kit 0.37.1 · profile shadcn · design entry: the Screen page
+// design-system-kit 0.37.2 · profile shadcn · design entry: the Screen page
 import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "../wireframe/image-placeholder";
 import { Screen } from "../wireframe/screen";

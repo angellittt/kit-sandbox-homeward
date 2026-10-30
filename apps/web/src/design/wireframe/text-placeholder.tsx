@@ -1,4 +1,4 @@
-// design-system-kit 0.37.1 · profile shadcn · design entry: the TextPlaceholder wireframe component
+// design-system-kit 0.37.2 · profile shadcn · design entry: the TextPlaceholder wireframe component
 //
 // Stands in for body copy that isn't written yet. Only for copy that doesn't
 // change the flow: headings, labels, button verbs, empty states and errors
