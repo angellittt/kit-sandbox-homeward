@@ -1,4 +1,4 @@
-// design-system-kit 0.37.4 · profile shadcn · design entry: the Toggle page
+// design-system-kit 0.37.5 · profile shadcn · design entry: the Toggle page
 import { useState } from "react";
 import { Bold, Italic, Star, Underline } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
