@@ -5,6 +5,7 @@
  * - Radius roles (D1): base `rounded-lg` -> `rounded-md` (a button); sm `rounded-[min(var(--radius-md),12px)]` -> `rounded-sm`.
  * - Control tokens: heights and min widths `8`/`7`/`9` -> `control-height-md`/`-sm`/`-lg`, padding `px-2.5` -> `control-padding-x`, text `text-sm` / `text-[0.8rem]` -> `control-label-md` / `-sm`, so the control set's density and text are token changes. Variable forms (`h-(--control-height-md)`, `text-(length:--control-label-md-size)`), so tailwind-merge still lets a call site's `h-10` or `text-lg` replace them.
  * - Layer and icon tokens: icon sizes `size-3`/`3.5`/`4`/`5` -> `size-(--icon-xs|sm|md|lg)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).
+ * - Client (design tweak, 2026-10-30): one radius step sharper, with Button — base `rounded-md` -> `rounded-sm`; sm `rounded-sm` -> `rounded-xs`.
  */
 "use client";
 
@@ -13,7 +14,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "cn";
 
 const toggleVariants = cva(
-  "group/toggle inline-flex items-center justify-center gap-1 rounded-md font-medium whitespace-nowrap transition-all hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 aria-pressed:bg-muted data-[state=on]:bg-muted dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-(--icon-md)",
+  "group/toggle inline-flex items-center justify-center gap-1 rounded-sm font-medium whitespace-nowrap transition-all hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 aria-pressed:bg-muted data-[state=on]:bg-muted dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-(--icon-md)",
   {
     variants: {
       variant: {
@@ -23,7 +24,7 @@ const toggleVariants = cva(
       size: {
         default:
           "h-(--control-height-md) min-w-(--control-height-md) px-(--control-padding-x) text-(length:--control-label-md-size) leading-(--control-label-md-leading) tracking-(--control-label-md-tracking) has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        sm: "h-(--control-height-sm) min-w-(--control-height-sm) rounded-sm px-(--control-padding-x) text-(length:--control-label-sm-size) leading-(--control-label-sm-leading) tracking-(--control-label-sm-tracking) has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-(--icon-sm)",
+        sm: "h-(--control-height-sm) min-w-(--control-height-sm) rounded-xs px-(--control-padding-x) text-(length:--control-label-sm-size) leading-(--control-label-sm-leading) tracking-(--control-label-sm-tracking) has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-(--icon-sm)",
         lg: "h-(--control-height-lg) min-w-(--control-height-lg) px-(--control-padding-x) text-(length:--control-label-md-size) leading-(--control-label-md-leading) tracking-(--control-label-md-tracking) has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
       },
     },

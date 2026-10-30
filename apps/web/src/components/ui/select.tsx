@@ -9,6 +9,7 @@
  * - Positioning: `alignItemWithTrigger` default `true` -> `false` (popup opens below the trigger instead of overlaying it).
  * - Control tokens: trigger heights `h-8`/`h-7` -> `control-height-md`/`-sm`, start padding `pl-2.5` -> `control-padding-x`, text `text-sm` -> `control-label-md` (the list's items keep `text-sm`), so the control set's density and text are token changes. Variable forms (`h-(--control-height-md)`, `text-(length:--control-label-md-size)`), so tailwind-merge still lets a call site's `h-10` or `text-lg` replace them.
  * - Layer and icon tokens: overlays' `z-50` -> `z-(--layer-overlay)`, icon sizes `size-3`/`3.5`/`4`/`5` -> `size-(--icon-xs|sm|md|lg)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).
+ * - Client (design tweak, 2026-10-30): one radius step sharper, with Button — trigger `rounded-md` -> `rounded-sm`, sm trigger `rounded-sm` -> `rounded-xs`.
  */
 "use client";
 
@@ -52,7 +53,7 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "flex w-fit items-center justify-between gap-1.5 rounded-md border border-input bg-transparent py-2 pr-2 pl-(--control-padding-x) text-(length:--control-label-md-size) leading-(--control-label-md-leading) tracking-(--control-label-md-tracking) whitespace-nowrap transition-colors select-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-placeholder:text-label-assistive data-[size=default]:h-(--control-height-md) data-[size=sm]:h-(--control-height-sm) data-[size=sm]:rounded-sm *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-(--icon-md)",
+        "flex w-fit items-center justify-between gap-1.5 rounded-sm border border-input bg-transparent py-2 pr-2 pl-(--control-padding-x) text-(length:--control-label-md-size) leading-(--control-label-md-leading) tracking-(--control-label-md-tracking) whitespace-nowrap transition-colors select-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-placeholder:text-label-assistive data-[size=default]:h-(--control-height-md) data-[size=sm]:h-(--control-height-sm) data-[size=sm]:rounded-xs *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-(--icon-md)",
         className,
       )}
       {...props}

@@ -9,13 +9,14 @@
  * - Control tokens: default, sm and lg heights `h-8`/`h-7`/`h-9` (and the icon sizes' `size-8`/`size-7`/`size-9`) -> `control-height-md`/`-sm`/`-lg`, padding `px-2.5` -> `control-padding-x`, text `text-sm` (base) / `text-[0.8rem]` (sm) -> `control-label-md` on default and lg, `control-label-sm` on sm (xs keeps `text-xs`), so the control set's density and text are token changes. Variable forms (`h-(--control-height-md)`, `text-(length:--control-label-md-size)`), so tailwind-merge still lets a call site's `h-10` or `text-lg` replace them.
  * - Layer and icon tokens: icon sizes `size-3`/`3.5`/`4`/`5` -> `size-(--icon-xs|sm|md|lg)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).
  * - Client (design tweak, 2026-10-19): default `h-9 px-3`, icon `size-9`; since kit 0.37.0 these are the control tokens (`control-height-md` 36px, `control-padding-x` 12px, design's Comfortable controls), so the classes take the kit's variable form.
+ * - Client (design tweak, 2026-10-30): one radius step sharper — base `rounded-md` -> `rounded-sm`; xs/sm/icon-xs/icon-sm `rounded-sm` -> `rounded-xs`; button-group override `rounded-md` -> `rounded-sm`.
  */
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "cn";
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding font-medium whitespace-nowrap transition-all select-none active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-(--icon-md)",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-sm border border-transparent bg-clip-padding font-medium whitespace-nowrap transition-all select-none active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-(--icon-md)",
   {
     variants: {
       variant: {
@@ -33,14 +34,14 @@ const buttonVariants = cva(
       size: {
         default:
           "h-(--control-height-md) gap-1.5 px-(--control-padding-x) text-(length:--control-label-md-size) leading-(--control-label-md-leading) tracking-(--control-label-md-tracking) has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        xs: "h-6 gap-1 rounded-sm px-2 text-xs in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-(--icon-xs)",
-        sm: "h-(--control-height-sm) gap-1 rounded-sm px-(--control-padding-x) text-(length:--control-label-sm-size) leading-(--control-label-sm-leading) tracking-(--control-label-sm-tracking) in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-(--icon-sm)",
+        xs: "h-6 gap-1 rounded-xs px-2 text-xs in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-(--icon-xs)",
+        sm: "h-(--control-height-sm) gap-1 rounded-xs px-(--control-padding-x) text-(length:--control-label-sm-size) leading-(--control-label-sm-leading) tracking-(--control-label-sm-tracking) in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-(--icon-sm)",
         lg: "h-(--control-height-lg) gap-1.5 px-(--control-padding-x) text-(length:--control-label-md-size) leading-(--control-label-md-leading) tracking-(--control-label-md-tracking) has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
         icon: "size-(--control-height-md)",
         "icon-xs":
-          "size-6 rounded-sm in-data-[slot=button-group]:rounded-md [&_svg:not([class*='size-'])]:size-(--icon-xs)",
+          "size-6 rounded-xs in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-(--icon-xs)",
         "icon-sm":
-          "size-(--control-height-sm) rounded-sm in-data-[slot=button-group]:rounded-md",
+          "size-(--control-height-sm) rounded-xs in-data-[slot=button-group]:rounded-sm",
         "icon-lg": "size-(--control-height-lg)",
       },
     },
