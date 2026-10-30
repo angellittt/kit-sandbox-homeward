@@ -1,4 +1,4 @@
-// design-system-kit 0.37.5 · profile shadcn · design entry: the ImagePlaceholder page
+// design-system-kit 0.38.0 · profile shadcn · design entry: the ImagePlaceholder page
 import { ImagePlaceholder } from "../wireframe/image-placeholder";
 
 export const ImagePlaceholderPreview = () => {

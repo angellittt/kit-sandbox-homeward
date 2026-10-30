@@ -1,4 +1,4 @@
-// design-system-kit 0.37.5 · profile shadcn · design entry: the Skeleton page
+// design-system-kit 0.38.0 · profile shadcn · design entry: the Skeleton page
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const SkeletonPreview = () => {

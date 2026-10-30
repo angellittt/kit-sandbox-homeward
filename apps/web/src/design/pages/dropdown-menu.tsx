@@ -1,4 +1,4 @@
-// design-system-kit 0.37.5 · profile shadcn · design entry: the DropdownMenu page
+// design-system-kit 0.38.0 · profile shadcn · design entry: the DropdownMenu page
 import { Copy, Ellipsis } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {

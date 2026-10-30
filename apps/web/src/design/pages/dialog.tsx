@@ -1,4 +1,4 @@
-// design-system-kit 0.37.5 · profile shadcn · design entry: the Dialog page
+// design-system-kit 0.38.0 · profile shadcn · design entry: the Dialog page
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

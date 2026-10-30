@@ -1,4 +1,4 @@
-// design-system-kit 0.37.5 · profile shadcn · design entry: the Screen wireframe component
+// design-system-kit 0.38.0 · profile shadcn · design entry: the Screen wireframe component
 //
 // Frames one step of a flow: the step's label above ("03 Upload documents" and
 // the device), then a frame with a browser or phone bar at its top and the

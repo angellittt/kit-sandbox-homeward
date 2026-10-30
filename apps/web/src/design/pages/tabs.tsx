@@ -1,4 +1,4 @@
-// design-system-kit 0.37.5 · profile shadcn · design entry: the Tabs page
+// design-system-kit 0.38.0 · profile shadcn · design entry: the Tabs page
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const TabsPreview = () => {

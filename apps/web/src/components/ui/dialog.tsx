@@ -1,4 +1,4 @@
-// design-system-kit 0.37.5 · profile shadcn · kit extension (replaces the stock file)
+// design-system-kit 0.38.0 · profile shadcn · kit extension (replaces the stock file)
 /**
  * Stock base-nova (shadcn 4.21.1, 2026-10-07) + TTT baseline:
  * - DialogOverlay: bg-black/10 -> bg-dimmer; open/close animation wrapped in motion-safe:.
