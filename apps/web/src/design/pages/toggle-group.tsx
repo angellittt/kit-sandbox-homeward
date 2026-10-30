@@ -1,4 +1,4 @@
-// design-system-kit 0.37.3 · profile shadcn · design entry: the ToggleGroup page
+// design-system-kit 0.37.4 · profile shadcn · design entry: the ToggleGroup page
 import { useState } from "react";
 import { Bold, Italic, LayoutGrid, List, Underline } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";

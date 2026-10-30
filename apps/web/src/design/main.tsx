@@ -1,4 +1,4 @@
-// design-system-kit 0.37.3 · profile shadcn · design entry: the start
+// design-system-kit 0.37.4 · profile shadcn · design entry: the start
 //
 // The app's global CSS (Tailwind, the theme block, the tokens and fonts) and
 // the theme provider, then the shell. Nothing else of the app: its router,
