@@ -1,4 +1,4 @@
-// design-system-kit 0.37.2 · profile shadcn · design entry: the shell
+// design-system-kit 0.37.3 · profile shadcn · design entry: the shell
 //
 // The page list by group on the left, one component on the right (#<slug> in
 // the address, so a link or the agent can open one directly), and the theme

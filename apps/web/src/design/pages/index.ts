@@ -1,4 +1,4 @@
-// design-system-kit 0.37.2 · profile shadcn · design entry: the page list
+// design-system-kit 0.37.3 · profile shadcn · design entry: the page list
 //
 // One page per component, as the design system shows it: the shell lists them
 // by group, in this order, and shows one at a time (#<slug>). A client

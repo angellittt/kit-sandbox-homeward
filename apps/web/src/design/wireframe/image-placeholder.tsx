@@ -1,4 +1,4 @@
-// design-system-kit 0.37.2 · profile shadcn · design entry: the ImagePlaceholder wireframe component
+// design-system-kit 0.37.3 · profile shadcn · design entry: the ImagePlaceholder wireframe component
 //
 // Stands in for an image, video, map or chart on a wireframe: a crossed frame
 // at the ratio the real asset will have, captioned with what goes there.

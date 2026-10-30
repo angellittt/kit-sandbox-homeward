@@ -1,4 +1,4 @@
-// design-system-kit 0.37.2 · profile shadcn · design entry: the Switch page
+// design-system-kit 0.37.3 · profile shadcn · design entry: the Switch page
 import {
   Field,
   FieldContent,

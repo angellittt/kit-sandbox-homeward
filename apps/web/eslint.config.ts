@@ -1,7 +1,7 @@
 import reactEslintConfig from "@repo/eslint-config/eslint.react.config";
 import { disableRulesCoveredByOxlint } from "@repo/eslint-config/oxlint";
 import { defineConfig } from "eslint/config";
-// design-system-kit 0.37.2 · profile shadcn · wiring (Vite): ESLint, for a TypeScript config
+// design-system-kit 0.37.3 · profile shadcn · wiring (Vite): ESLint, for a TypeScript config
 import type { ESLint, Linter, Rule } from "eslint";
 import { builtinRules } from "eslint/use-at-your-own-risk";
 
