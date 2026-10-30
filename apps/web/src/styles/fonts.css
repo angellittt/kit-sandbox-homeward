@@ -43,6 +43,6 @@
   /* Only the families that load a face, e.g.:
   --font-sans: "{{SANS_FAMILY}}";
   */
-  --font-display: "Nunito Variable";
-  --font-sans: "Inter Variable";
+  --font-display: "Nunito Variable", var(--font-fallback-display);
+  --font-sans: "Inter Variable", var(--font-fallback-sans);
 }
