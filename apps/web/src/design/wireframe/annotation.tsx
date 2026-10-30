@@ -1,4 +1,4 @@
-// design-system-kit 0.37.2 · profile shadcn · design entry: the Annotation wireframe component
+// design-system-kit 0.37.3 · profile shadcn · design entry: the Annotation wireframe component
 //
 // Explains behaviour or an open question on a wireframe: a numbered pin on the
 // element, and a note with the same number in the margin, never over the UI.

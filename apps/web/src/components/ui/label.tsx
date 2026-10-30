@@ -1,4 +1,4 @@
-// design-system-kit 0.37.2 · profile shadcn · stock component (base-nova + baseline only)
+// design-system-kit 0.37.3 · profile shadcn · stock component (base-nova + baseline only)
 "use client";
 
 import * as React from "react";

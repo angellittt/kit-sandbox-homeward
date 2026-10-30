@@ -1,4 +1,4 @@
-// design-system-kit 0.37.2 · profile shadcn · design entry: the Input page
+// design-system-kit 0.37.3 · profile shadcn · design entry: the Input page
 import {
   Field,
   FieldDescription,
