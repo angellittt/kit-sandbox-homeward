@@ -1,4 +1,4 @@
-// design-system-kit 0.37.0 · profile shadcn · design entry: the Sonner page
+// design-system-kit 0.37.1 · profile shadcn · design entry: the Sonner page
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";

@@ -1,4 +1,4 @@
-// design-system-kit 0.37.0 · profile shadcn · design entry: the Card page
+// design-system-kit 0.37.1 · profile shadcn · design entry: the Card page
 import { Button } from "@/components/ui/button";
 import {
   Card,

@@ -1,4 +1,4 @@
-// design-system-kit 0.37.0 · profile shadcn · design entry: the InputGroup page
+// design-system-kit 0.37.1 · profile shadcn · design entry: the InputGroup page
 import { useState } from "react";
 import { Search, X } from "lucide-react";
 import {

@@ -1,4 +1,4 @@
-// design-system-kit 0.37.0 · profile shadcn · design entry: the Empty page
+// design-system-kit 0.37.1 · profile shadcn · design entry: the Empty page
 import { Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
