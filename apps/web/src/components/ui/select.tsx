@@ -9,7 +9,7 @@
  * - Positioning: `alignItemWithTrigger` default `true` -> `false` (popup opens below the trigger instead of overlaying it).
  * - Control tokens: trigger heights `h-8`/`h-7` -> `control-height-md`/`-sm`, start padding `pl-2.5` -> `control-padding-x`, text `text-sm` -> `control-label-md` (the list's items keep `text-sm`), so the control set's density and text are token changes. Variable forms (`h-(--control-height-md)`, `text-(length:--control-label-md-size)`), so tailwind-merge still lets a call site's `h-10` or `text-lg` replace them.
  * - Layer and icon tokens: overlays' `z-50` -> `z-(--layer-overlay)`, icon sizes `size-3`/`3.5`/`4`/`5` -> `size-(--icon-xs|sm|md|lg)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).
- * - Client (design tweak, 2026-10-30): one radius step sharper, with Button — trigger `rounded-md` -> `rounded-sm`, sm trigger `rounded-sm` -> `rounded-xs`.
+ * - Client (design tweak, 2026-10-30): one radius step sharper, with Button — trigger `rounded-md` -> `rounded-sm`, sm trigger `rounded-sm` -> `rounded-xs`. Items sharper too, to match the buttons — `rounded-inset` -> `rounded-sm`; the popup `rounded-lg` -> `rounded-md`, so its corner follows the items'.
  */
 "use client";
 
@@ -96,7 +96,7 @@ function SelectContent({
           data-slot="select-content"
           data-align-trigger={alignItemWithTrigger}
           className={cn(
-            "relative isolate z-(--layer-overlay) max-h-(--available-height) w-(--anchor-width) min-w-36 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-md border border-border duration-100 data-[align-trigger=true]:animate-none motion-safe:data-[side=bottom]:slide-in-from-top-2 motion-safe:data-[side=inline-end]:slide-in-from-left-2 motion-safe:data-[side=inline-start]:slide-in-from-right-2 motion-safe:data-[side=left]:slide-in-from-right-2 motion-safe:data-[side=right]:slide-in-from-left-2 motion-safe:data-[side=top]:slide-in-from-bottom-2 motion-safe:data-open:animate-in motion-safe:data-open:fade-in-0 motion-safe:data-open:zoom-in-95 motion-safe:data-closed:animate-out motion-safe:data-closed:fade-out-0 motion-safe:data-closed:zoom-out-95",
+            "relative isolate z-(--layer-overlay) max-h-(--available-height) w-(--anchor-width) min-w-36 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-md bg-popover text-popover-foreground shadow-md border border-border duration-100 data-[align-trigger=true]:animate-none motion-safe:data-[side=bottom]:slide-in-from-top-2 motion-safe:data-[side=inline-end]:slide-in-from-left-2 motion-safe:data-[side=inline-start]:slide-in-from-right-2 motion-safe:data-[side=left]:slide-in-from-right-2 motion-safe:data-[side=right]:slide-in-from-left-2 motion-safe:data-[side=top]:slide-in-from-bottom-2 motion-safe:data-open:animate-in motion-safe:data-open:fade-in-0 motion-safe:data-open:zoom-in-95 motion-safe:data-closed:animate-out motion-safe:data-closed:fade-out-0 motion-safe:data-closed:zoom-out-95",
             className,
           )}
           {...props}
@@ -132,7 +132,7 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-default items-center gap-1.5 rounded-inset py-1 pr-8 pl-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-(--icon-md) *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        "relative flex w-full cursor-default items-center gap-1.5 rounded-sm py-1 pr-8 pl-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-(--icon-md) *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
         className,
       )}
       {...props}

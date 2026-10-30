@@ -8,6 +8,7 @@
  * - PopoverDescription: `text-muted-foreground` -> `text-label-neutral` (description label role).
  * - PopoverClose: wraps Base UI's `Popover.Close` (stock gap).
  * - Layer and icon tokens: overlays' `z-50` -> `z-(--layer-overlay)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).
+ * - Client (design tweak, 2026-10-30): sharper, to match the menus — PopoverContent `rounded-lg` -> `rounded-md`.
  */
 
 import * as React from "react";
@@ -46,7 +47,7 @@ function PopoverContent({
         <PopoverPrimitive.Popup
           data-slot="popover-content"
           className={cn(
-            "z-(--layer-overlay) flex w-72 origin-(--transform-origin) flex-col gap-2.5 rounded-lg bg-popover p-2.5 text-sm text-popover-foreground shadow-md border border-border outline-hidden duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=inline-end]:slide-in-from-left-2 data-[side=inline-start]:slide-in-from-right-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 motion-safe:data-open:animate-in motion-safe:data-open:fade-in-0 motion-safe:data-open:zoom-in-95 motion-safe:data-closed:animate-out motion-safe:data-closed:fade-out-0 motion-safe:data-closed:zoom-out-95",
+            "z-(--layer-overlay) flex w-72 origin-(--transform-origin) flex-col gap-2.5 rounded-md bg-popover p-2.5 text-sm text-popover-foreground shadow-md border border-border outline-hidden duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=inline-end]:slide-in-from-left-2 data-[side=inline-start]:slide-in-from-right-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 motion-safe:data-open:animate-in motion-safe:data-open:fade-in-0 motion-safe:data-open:zoom-in-95 motion-safe:data-closed:animate-out motion-safe:data-closed:fade-out-0 motion-safe:data-closed:zoom-out-95",
             className,
           )}
           {...props}
