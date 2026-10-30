@@ -1,4 +1,4 @@
-// design-system-kit 0.37.4 · profile shadcn · wiring: theme switching
+// design-system-kit 0.37.5 · profile shadcn · wiring: theme switching
 import * as React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 

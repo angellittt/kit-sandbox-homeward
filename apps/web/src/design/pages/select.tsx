@@ -1,4 +1,4 @@
-// design-system-kit 0.37.4 · profile shadcn · design entry: the Select page
+// design-system-kit 0.37.5 · profile shadcn · design entry: the Select page
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Select,
