@@ -1,4 +1,4 @@
-// design-system-kit 0.37.1 · profile shadcn · design entry: the ImagePlaceholder wireframe component
+// design-system-kit 0.37.2 · profile shadcn · design entry: the ImagePlaceholder wireframe component
 //
 // Stands in for an image, video, map or chart on a wireframe: a crossed frame
 // at the ratio the real asset will have, captioned with what goes there.
@@ -70,7 +70,7 @@ export const ImagePlaceholder = ({
       <figcaption
         id={captionId}
         data-slot="image-placeholder-caption"
-        className="relative bg-fill-alternative px-1.5 py-0.5 text-label-assistive type-caption-1"
+        className="relative bg-fill-alternative px-1.5 py-0.5 text-label-alternative type-caption-1"
       >
         {caption}
       </figcaption>

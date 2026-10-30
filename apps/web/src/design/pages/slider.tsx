@@ -1,4 +1,4 @@
-// design-system-kit 0.37.1 · profile shadcn · design entry: the Slider page
+// design-system-kit 0.37.2 · profile shadcn · design entry: the Slider page
 import { useState } from "react";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Slider } from "@/components/ui/slider";

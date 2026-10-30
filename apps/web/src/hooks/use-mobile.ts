@@ -1,4 +1,4 @@
-// design-system-kit 0.37.1 · profile shadcn · stock component (base-nova + baseline only)
+// design-system-kit 0.37.2 · profile shadcn · stock component (base-nova + baseline only)
 /**
  * TTT baseline:
  * - Breakpoint token: the mobile breakpoint is the design system's `--breakpoint-md` (read from the token file at runtime), 768px without one.

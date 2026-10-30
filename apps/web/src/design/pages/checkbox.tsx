@@ -1,4 +1,4 @@
-// design-system-kit 0.37.1 · profile shadcn · design entry: the Checkbox page
+// design-system-kit 0.37.2 · profile shadcn · design entry: the Checkbox page
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
 

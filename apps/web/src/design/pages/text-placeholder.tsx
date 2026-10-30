@@ -1,4 +1,4 @@
-// design-system-kit 0.37.1 · profile shadcn · design entry: the TextPlaceholder page
+// design-system-kit 0.37.2 · profile shadcn · design entry: the TextPlaceholder page
 import { TextPlaceholder } from "../wireframe/text-placeholder";
 
 export const TextPlaceholderPreview = () => {
