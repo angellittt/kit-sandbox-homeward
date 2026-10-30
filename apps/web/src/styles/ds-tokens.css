@@ -10,16 +10,16 @@
 /* Primitive ramps. Never mapped to a utility and never referenced by
  * components — the semantic layer below aliases them. */
 :root {
-  --brand-primary-10: #2a0605;
-  --brand-primary-20: #5c1816;
-  --brand-primary-30: #8f2c28;
-  --brand-primary-40: #c23f3a;
-  --brand-primary-50: #f25c54;
-  --brand-primary-60: #f68076;
-  --brand-primary-70: #f9a298;
-  --brand-primary-80: #fac3bc;
-  --brand-primary-90: #fadedb;
-  --brand-primary-95: #faeeec;
+  --brand-primary-10: #240e00;
+  --brand-primary-20: #411f00;
+  --brand-primary-30: #603000;
+  --brand-primary-40: #7d4000;
+  --brand-primary-50: #9c5200;
+  --brand-primary-60: #ca6b00;
+  --brand-primary-70: #f28f3b;
+  --brand-primary-80: #f7b98c;
+  --brand-primary-90: #fadbc5;
+  --brand-primary-95: #fceee4;
   --brand-secondary-10: #3a2314;
   --brand-secondary-20: #6c4228;
   --brand-secondary-30: #9c613c;
@@ -200,8 +200,8 @@
 /* Light theme — also the default, so the page is right before the theme script runs. */
 :root,
 [data-theme="light"] {
-  --primary-normal: var(--brand-primary-50);
-  --primary-strong: var(--brand-primary-60);
+  --primary-normal: var(--brand-primary-70);
+  --primary-strong: var(--brand-primary-80);
   --primary-heavy: var(--brand-primary-30);
   --primary-text: var(--brand-primary-30);
   --primary-soft: var(--brand-primary-95);
@@ -261,8 +261,8 @@
 
 /* Dark theme. */
 [data-theme="dark"] {
-  --primary-normal: var(--brand-primary-50);
-  --primary-strong: var(--brand-primary-60);
+  --primary-normal: var(--brand-primary-70);
+  --primary-strong: var(--brand-primary-80);
   --primary-heavy: var(--brand-primary-70);
   --primary-text: var(--brand-primary-70);
   --primary-soft: var(--brand-primary-10);
