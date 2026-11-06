@@ -1,4 +1,4 @@
-// design-system-kit 0.38.0 · profile shadcn · design entry: the Select page
+// design-system-kit 0.45.0 · profile shadcn · design entry: the Select page
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Select,
@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Labelled } from "../labels";
 
 export const SelectPreview = () => {
   const regions = [
@@ -18,53 +19,59 @@ export const SelectPreview = () => {
   ];
   return (
     <div className="col" style={{ maxWidth: 300, height: 270 }}>
-      <Field>
-        <FieldLabel htmlFor="rg">Region</FieldLabel>
-        <Select defaultValue="eu" items={regions} defaultOpen modal={false}>
-          <SelectTrigger id="rg">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Regions</SelectLabel>
-              {regions.map((r) => (
-                <SelectItem key={r.value} value={r.value}>
-                  {r.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </Field>
+      <Labelled label="default, open">
+        <Field>
+          <FieldLabel htmlFor="rg">Region</FieldLabel>
+          <Select defaultValue="eu" items={regions} defaultOpen modal={false}>
+            <SelectTrigger id="rg">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Regions</SelectLabel>
+                {regions.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>
+                    {r.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </Field>
+      </Labelled>
       <div className="row">
-        <Select items={regions}>
-          <SelectTrigger size="sm" aria-label="Small select">
-            <SelectValue placeholder="Small" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {regions.map((r) => (
-                <SelectItem key={r.value} value={r.value}>
-                  {r.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <Select items={regions} disabled>
-          <SelectTrigger aria-label="Disabled select">
-            <SelectValue placeholder="Disabled" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {regions.map((r) => (
-                <SelectItem key={r.value} value={r.value}>
-                  {r.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        <Labelled label="sm">
+          <Select items={regions}>
+            <SelectTrigger size="sm" aria-label="Small select">
+              <SelectValue placeholder="Small" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {regions.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>
+                    {r.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </Labelled>
+        <Labelled label="disabled">
+          <Select items={regions} disabled>
+            <SelectTrigger aria-label="Disabled select">
+              <SelectValue placeholder="Disabled" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {regions.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>
+                    {r.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </Labelled>
       </div>
     </div>
   );

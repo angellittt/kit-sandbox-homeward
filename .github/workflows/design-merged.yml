@@ -1,0 +1,51 @@
+# design-system-kit 0.45.0 · profile shadcn · wiring (CI): GitHub Actions, design branches merged
+#
+# Setup copies this to .github/workflows/design-merged.yml at the repo root,
+# beside design.yml. One job, when a designer's design/* PR merges into
+# develop (the integration branch: change it below if it isn't develop):
+#
+# - figma-pending: a comment whose first line is
+#   `figma-pending · design-system-kit`, and the `figma-pending` label (created
+#   the first time). Figma and the design system still show the version before
+#   the merge until someone updates them from code; that step swaps the label
+#   for `in-figma`. A merge with no net change (the push's commits, from
+#   before to after, change no file: a PR whose changes were reverted on its
+#   own branch) has nothing for Figma, so it isn't marked.
+#
+# It runs on the push the merge makes and finds the PR from its commit, as the
+# Bitbucket pipeline does, rather than on the pull_request event: a
+# pull_request workflow is one the repo's own checks may hold to their rules (a
+# local CI run, a check that every CI step has a git hook), and there's nothing
+# to check before a push. It checks nothing out. A rerun marks a PR once.
+name: design merged
+on:
+  push:
+    branches: [main] # the integration branch (.ttt/design-system.json integrationBranch)
+permissions: {} # each job asks for what it needs
+jobs:
+  figma-pending:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read # the commit's pull requests
+      issues: write # the label (labels are issues' on GitHub)
+      pull-requests: write # the comment
+    steps:
+      - name: mark it Figma pending
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          BEFORE: ${{ github.event.before }}
+          BASE: ${{ github.ref_name }}
+        run: |
+          PR=$(gh api "repos/$GH_REPO/commits/$SHA/pulls" --jq '[.[] | select(.merged_at != null and (.head.ref | startswith("design/")))][0].number // empty')
+          if [ -z "$PR" ]; then echo "$SHA merges no design/* pull request: nothing to mark."; exit 0; fi
+          if [ -n "$BEFORE" ] && [ "$BEFORE" != 0000000000000000000000000000000000000000 ] && [ "$(gh api "repos/$GH_REPO/compare/$BEFORE...$SHA" --jq '.files | length')" = 0 ]; then echo "#$PR merged with no net change: nothing for Figma, not marked."; exit 0; fi
+          if gh api "repos/$GH_REPO/issues/$PR/labels" --jq '.[].name' | grep -qxE 'figma-pending|in-figma'; then echo "#$PR is already marked."; exit 0; fi
+          gh api "repos/$GH_REPO/labels" -f name=figma-pending -f color=FBCA04 -f description="Merged; Figma and the design system not updated yet" >/dev/null 2>&1 || true
+          gh api "repos/$GH_REPO/issues/$PR/labels" -f "labels[]=figma-pending" >/dev/null
+          gh pr comment "$PR" --body "figma-pending · design-system-kit
+
+          Merged into \`$BASE\`. Figma and the design system still show the version before this PR. Whoever has a Full Figma seat updates them from code (\"update Figma\" in a Claude session), then publishes the library; the label becomes \`in-figma\` then."
+          echo "#$PR marked Figma pending."

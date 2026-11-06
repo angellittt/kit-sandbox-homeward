@@ -1,4 +1,4 @@
-// design-system-kit 0.38.0 · profile shadcn · stock component (base-nova + baseline only)
+// design-system-kit 0.45.0 · profile shadcn · stock component (base-nova + baseline only)
 "use client";
 
 /**

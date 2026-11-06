@@ -70,5 +70,7 @@ tsconfig*.tsbuildinfo
 # design-system-kit: kit-owned and generated files (kept byte for byte)
 apps/web/.ttt/
 apps/web/scripts/ds-validate.mjs
+apps/web/scripts/ds-contrast.mjs
+apps/web/scripts/contrast-pairs.json
 apps/web/scripts/ds-drift.test.mjs
 apps/web/src/styles/ds-tokens.css

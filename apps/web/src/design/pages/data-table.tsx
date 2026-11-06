@@ -1,4 +1,4 @@
-// design-system-kit 0.38.0 · profile shadcn · design entry: the DataTable page
+// design-system-kit 0.45.0 · profile shadcn · design entry: the DataTable page
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,6 +10,7 @@ import {
   useDataTable,
 } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
+import { Property } from "../labels";
 
 type Invoice = { id: string; client: string; status: string; amount: number };
 
@@ -81,23 +82,26 @@ export const DataTablePreview = () => {
   const client = table.getColumn("client");
   const filter = (client?.getFilterValue() as string | undefined) ?? "";
   return (
-    <div className="col" style={{ maxWidth: 640, gap: 12 }}>
-      <div className="row" style={{ flexWrap: "nowrap" }}>
-        <Input
-          aria-label="Filter clients"
-          placeholder="Filter clients…"
-          value={filter}
-          style={{ maxWidth: 240 }}
-          onChange={(e) => {
-            client?.setFilterValue(e.target.value);
-          }}
-        />
-        <div style={{ marginLeft: "auto" }}>
-          <DataTableViewOptions table={table} />
+    <>
+      <Property name="Filter, column options, sortable headers (Client, Amount), row selection and pagination" />
+      <div className="col" style={{ maxWidth: 640, gap: 12 }}>
+        <div className="row" style={{ flexWrap: "nowrap" }}>
+          <Input
+            aria-label="Filter clients"
+            placeholder="Filter clients…"
+            value={filter}
+            style={{ maxWidth: 240 }}
+            onChange={(e) => {
+              client?.setFilterValue(e.target.value);
+            }}
+          />
+          <div style={{ marginLeft: "auto" }}>
+            <DataTableViewOptions table={table} />
+          </div>
         </div>
+        <DataTable table={table} />
+        <DataTablePagination table={table} pageSizes={[5, 10]} />
       </div>
-      <DataTable table={table} />
-      <DataTablePagination table={table} pageSizes={[5, 10]} />
-    </div>
+    </>
   );
 };

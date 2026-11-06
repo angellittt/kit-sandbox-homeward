@@ -1,11 +1,12 @@
 // @vitest-environment node
-// design-system-kit 0.38.0 · profile shadcn · wiring: the repo against its design system
+// design-system-kit 0.45.0 · profile shadcn · wiring: the repo against its design system
 //
-// Setup puts this beside the one kit script a repo carries, scripts/ds-validate.mjs,
-// so the repo's own test run (and so its CI) checks it.
+// Setup puts this beside the one kit script a repo carries, scripts/ds-validate.mjs
+// (with the contrast check it runs), so the repo's own test run (and so its CI)
+// checks it.
 //
 // Runs ds-validate on this repo in its own test run, so CI catches what a
-// person would otherwise only see by running ds:validate: config errors, and
+// person would otherwise only see by running ds:validate: config errors, contrast misses, and
 // drift between code and the design system's System section (the committed
 // snapshot, systemIn). Skipped where there's no repo config (the kit's own
 // test run).
