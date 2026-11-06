@@ -1,7 +1,8 @@
 # Git hooks, managed by Lefthook (https://lefthook.dev).
 # `pnpm install` installs them (see the "prepare" script in package.json).
 #
-# Rule: if CI would fail, the commit (or push) fails first.
+# Rule: if CI would fail, the commit (or push) fails first, except on
+# `design/*` branches.
 # Every job calls the same pnpm script / turbo task CI calls, so there is
 # one source of truth for each check. `pnpm check:hook-parity` fails if this
 # file and the PR workflows stop running the same checks. `--affected` limits
@@ -10,6 +11,9 @@
 #
 # Every job runs through `mise x --`, so it uses the tool versions pinned in
 # mise.toml even when git runs without your shell profile (GUI git clients).
+#
+# design-system-kit: designers' `design/*` branches skip the heavy jobs; their
+# PRs run them in CI, and a dev reviews them there.
 glob_matcher: doublestar
 
 pre-commit:
@@ -26,7 +30,20 @@ pre-commit:
     # parallel and builds shared packages once. Separate lefthook jobs would
     # start three turbo processes that race to rebuild the same dist folders.
     - name: lint, typecheck, test
+      skip:
+        - ref: design/*
       run: mise x -- pnpm verify --affected --output-logs=errors-only
+      env:
+        TURBO_SCM_BASE: HEAD
+
+    # design-system-kit: the same checks on design/* branches when component
+    # code is staged, advisory. A new library component without tests can drop
+    # the app under a coverage threshold; the dev fixes that on the PR.
+    - name: lint, typecheck, test (advisory)
+      only:
+        - ref: design/*
+      glob: "apps/web/src/components/ui/**"
+      run: mise x -- pnpm verify --affected --output-logs=errors-only || echo "These checks failed. That doesn't stop the commit; a dev picks it up on the pull request."
       env:
         TURBO_SCM_BASE: HEAD
 
@@ -99,6 +116,8 @@ pre-push:
     # listing the files that matter (a list that goes stale), this skips only
     # pushes that touch nothing but docs, infra or CI config.
     - name: e2e
+      skip:
+        - ref: design/*
       exclude:
         - "**/*.md"
         - "docs/**"
@@ -107,3 +126,10 @@ pre-push:
       files: git diff --name-only @{push}..HEAD 2>/dev/null || git diff --name-only origin/main...HEAD
       run: mise x -- ./scripts/e2e-ci.sh
       fail_text: "E2E tests failed. Fix them before pushing (Docker must be running)."
+
+    # design-system-kit: the files the branch changes outside the design
+    # paths, so the designer knows a dev will look at them. Advisory.
+    - name: design scope (advisory)
+      only:
+        - ref: design/*
+      run: mise x -- pnpm ds:scope || echo "A dev will check these files on the pull request."

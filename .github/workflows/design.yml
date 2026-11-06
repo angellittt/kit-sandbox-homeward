@@ -1,59 +1,48 @@
-# design-system-kit 0.38.0 · profile shadcn · wiring (CI): GitHub Actions, design branches
+# design-system-kit 0.45.0 · profile shadcn · wiring (CI): GitHub Actions, design branches, toolchain from mise.toml
 #
-# Setup copies this to .github/workflows/design.yml with the app's folder from
-# the repo root filled in (`apps/web` in the starter template, `.` in a
-# single-package repo). Two jobs, both only for a designer's design/* branch:
+# github-design.yml for a repo whose toolchain is mise.toml (TTT's starter
+# template and the repos spun up from it): Setup copies this one instead, to
+# .github/workflows/design.yml at the repo root, and github-design-merged.yml
+# beside it as design-merged.yml. One job, only for a designer's design/*
+# branch:
 #
-# - scope: on the PR, `ds-validate --design-scope` fails when the branch changes
-#   a file outside the design paths (the token source and token file, the
-#   component folder, the design entry), naming each. It's for the dev who
-#   reviews; the designer never sees it. Needs only Node and git, so nothing is
-#   installed.
-# - figma-pending: when the PR merges, a comment whose first line is
-#   `figma-pending · design-system-kit`, and the `figma-pending` label (created
-#   the first time). Figma and the design system still show the version before
-#   the merge until someone updates them from code; that step swaps the label
-#   for `in-figma`.
+# - scope: on the PR, the root package.json's `ds:scope` (`ds-validate
+#   --design-scope --advisory`) names each file the branch changes outside the
+#   design paths (the token source and token file, the System section
+#   snapshot, the component folder, the design entry) as a warning annotation:
+#   the check stays green. It's for the dev who reviews; the designer never sees
+#   it. Needs only Node, git and pnpm: no packages installed.
+#   DS_BASE is the PR's base, which `ds:scope` diffs from instead of develop.
 #
-# Pin the actions to a commit SHA if the repo pins its others.
+# Every step runs a package.json script, so a check that every CI step has a
+# git hook finds the hooks' own `ds:scope` (the designers' lane). The marking
+# when the PR merges is design-merged.yml's, on the push the merge makes.
+#
+# Node and pnpm come from mise.toml through jdx/mise-action, as a repo whose
+# tool-version check accepts no other route wants: `install_args` installs those
+# two tools alone (with mise.lock, the action adds `--locked`). This file names
+# no other way to set them up, since such a check reads comments too.
 name: design
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review, closed]
+    types: [opened, synchronize, reopened, ready_for_review]
 permissions: {} # each job asks for what it needs
 jobs:
   scope:
-    if: github.event.action != 'closed' && startsWith(github.head_ref, 'design/')
+    if: startsWith(github.head_ref, 'design/')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned by SHA as the starter pins its actions
         with:
           fetch-depth: 0 # the base branch, to diff from where the branch left it
           persist-credentials: false
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          install_args: node pnpm # the two tools ds:scope needs, at mise.toml's versions
       - name: design paths only
         env:
-          BASE: ${{ github.base_ref }}
-        run: node "apps/web/scripts/ds-validate.mjs" --repo "apps/web" --design-scope "origin/$BASE"
-  figma-pending:
-    if: github.event.action == 'closed' && github.event.pull_request.merged && startsWith(github.head_ref, 'design/')
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      issues: write # the label (labels are issues' on GitHub)
-      pull-requests: write # the comment
-    steps:
-      - name: mark it Figma pending
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          PR: ${{ github.event.pull_request.number }}
-          BASE: ${{ github.base_ref }}
-        run: |
-          gh api "repos/$GH_REPO/labels" -f name=figma-pending -f color=FBCA04 -f description="Merged; Figma and the design system not updated yet" >/dev/null 2>&1 || true
-          gh api "repos/$GH_REPO/issues/$PR/labels" -f "labels[]=figma-pending" >/dev/null
-          gh pr comment "$PR" --body "figma-pending · design-system-kit
-
-          Merged into \`$BASE\`. Figma and the design system still show the version before this PR. Whoever has a Full Figma seat updates them from code (\"update Figma\" in a Claude session), then publishes the library; the label becomes \`in-figma\` then."
+          DS_BASE: ${{ github.base_ref }}
+        run: pnpm ds:scope

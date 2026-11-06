@@ -42,7 +42,8 @@
     "check:tool-versions": "bash ./scripts/tool-versions/check-tool-versions.sh",
     "test:tool-versions": "bash ./scripts/tool-versions/check-tool-versions.test.sh",
     "check:hook-parity": "bash ./scripts/hook-parity/check-hook-parity.sh",
-    "test:hook-parity": "bash ./scripts/hook-parity/check-hook-parity.test.sh"
+    "test:hook-parity": "bash ./scripts/hook-parity/check-hook-parity.test.sh",
+    "ds:scope": "b=${DS_BASE:-main}; git fetch -q origin \"$b\" 2>/dev/null; node apps/web/scripts/ds-validate.mjs --repo apps/web --design-scope \"origin/$b\" --advisory"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",
