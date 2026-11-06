@@ -1,7 +1,7 @@
 import reactEslintConfig from "@repo/eslint-config/eslint.react.config";
 import { disableRulesCoveredByOxlint } from "@repo/eslint-config/oxlint";
 import { defineConfig } from "eslint/config";
-// design-system-kit 0.38.0 · profile shadcn · wiring (Vite): ESLint, for a TypeScript config
+// design-system-kit 0.45.0 · profile shadcn · wiring (Vite): ESLint, for a TypeScript config
 import type { ESLint, Linter, Rule } from "eslint";
 import { builtinRules } from "eslint/use-at-your-own-risk";
 
@@ -343,7 +343,13 @@ const withDesignSystem = (entries: Linter.Config[]): Linter.Config[] => [
   designEntryOut,
   dsStyleRulesOff(entries),
   // The kit files a repo carries for its CI check are linted in the kit.
-  { ignores: ["scripts/ds-validate.mjs", "scripts/ds-drift.test.mjs"] },
+  {
+    ignores: [
+      "scripts/ds-validate.mjs",
+      "scripts/ds-contrast.mjs",
+      "scripts/ds-drift.test.mjs",
+    ],
+  },
 ];
 // ---- end design-system-kit -------------------------------------------------
 

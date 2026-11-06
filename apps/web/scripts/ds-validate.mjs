@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// design-system-kit 0.38.0 · profile shadcn · kit file — fix it in the kit, not per client
+// design-system-kit 0.45.0 · profile shadcn · kit file — fix it in the kit, not per client
 /**
  * ds-validate.mjs — the contract's config validation.
  *
@@ -20,18 +20,29 @@
  *                                             # tokens stay outside the checkout)
  *   node scripts/ds-validate.mjs --template <config.json> --tokens <tokens.json>
  *                                             # the kit's own templates ("{{…}}" allowed)
- *   node scripts/ds-validate.mjs --design-scope <base> [--repo <app>]
+ *   node scripts/ds-validate.mjs --design-scope <base> [--repo <app>] [--advisory]
  *                                             # a designer's design/* branch: fail on any
  *                                             # file it changes since <base> outside the
  *                                             # design paths (designPaths below); exits 1
- *                                             # naming each, 2 when git can't diff. Needs
+ *                                             # naming each, 2 when git can't diff.
+ *                                             # --advisory names them and exits 0 (on
+ *                                             # GitHub Actions, as warning annotations),
+ *                                             # so a design PR's CI isn't red. Needs
  *                                             # only node and git, so CI runs it before
  *                                             # installing anything (wiring/ci/)
+ *   node scripts/ds-validate.mjs --print-design-paths [--repo <app>]
+ *                                             # the design paths, one per line, relative
+ *                                             # to the app's folder (a folder ends in "/"),
+ *                                             # for a repo's own checks (a hook's exclude
+ *                                             # list); exits 2 when they can't be read.
+ *                                             # `designPaths()` is the same list as a
+ *                                             # stable export
  *
  * Checks `.ttt/design-system.json` against the schema below (every key), the
  * token snapshot it points at (name grammar, aliases, cycles, colour formats,
  * the semantic tokens the profile's mapping needs, primitive ramps named by
- * role, never by hue), that the theme block's
+ * role, never by hue), every contrast pair in every theme (ds-contrast.mjs's
+ * check, beside this file, with the config's waivers), that the theme block's
  * `@source` resolves to the source root, that the global CSS has no style rule
  * outside a cascade layer (it would beat every Tailwind utility; read with
  * PostCSS, a dev dependency Setup adds), and that the repo's `kitVersion` is
@@ -51,11 +62,23 @@ import { createRequire } from "node:module"
 import { spawnSync } from "node:child_process"
 
 /** The kit these scripts belong to. A repo may not claim a newer one. */
-export const KIT_VERSION = "0.38.0"
+export const KIT_VERSION = "0.45.0"
 const SCHEMA = "ttt-ds/1"
 const PROFILE = "shadcn"
 
 const HERE = dirname(fileURLToPath(import.meta.url))
+
+/**
+ * The contrast check (ds-contrast.mjs and contrast-pairs.json, which a repo
+ * carries beside this file since kit 0.42.0). Loaded so that a repo still
+ * missing them gets a note, not a crash: an upgrade adds them.
+ */
+const contrastCheck = await (async () => {
+  try {
+    const { check } = await import("./ds-contrast.mjs")
+    return { check, pairs: JSON.parse(readFileSync(join(HERE, "contrast-pairs.json"), "utf8")) }
+  } catch { return null }
+})()
 
 // ---------------------------------------------------------------------------
 // Profile: shadcn. The contract's token mapping table, in full.
@@ -107,6 +130,13 @@ export const SHADCN_MAP = {
   "chart-4": "chart-4",
   "chart-5": "chart-5",
 };
+
+/**
+ * The chart colours past the first: a system has as many as its charts use,
+ * `chart-1` … `chart-N` with no gap (contract, Token tiers, Chart). Only those
+ * it has are mapped.
+ */
+export const OPTIONAL_CHARTS = ["chart-2", "chart-3", "chart-4", "chart-5"]
 
 /**
  * Tailwind-only colour names from the mapping table: brand colours, which
@@ -189,6 +219,8 @@ const LENGTH = /^-?(\d+\.?\d*|\.\d+)(px|rem|em|%)?$/
 
 /** The contract's standard primitive ramps. A client may add more, named by role. */
 export const STANDARD_RAMPS = ["brand-primary", "brand-secondary", "brand-accent", "neutral", "positive", "cautionary", "negative", "info"]
+/** The standard ramps a system may go without, its role's tokens aliasing another ramp (contract, Token tiers). */
+export const OPTIONAL_RAMPS = ["brand-secondary", "brand-accent", "info"]
 /** Words that name a hue, not a role. A ramp name containing one is rejected. */
 const HUE_WORDS = new Set(("red orange amber yellow lime green emerald teal cyan sky blue indigo violet purple " +
   "fuchsia pink rose magenta plum lavender lilac mauve maroon crimson scarlet tomato coral salmon peach " +
@@ -214,6 +246,9 @@ export function listedInSystem(markdown) {
 // The config schema: every key, what it must be, how to fix it
 // ---------------------------------------------------------------------------
 
+/** A branch name as `git check-ref-format --branch` takes it, without a remote or refs/ prefix. */
+const isBranchName = (v) =>
+  typeof v === "string" && /^[A-Za-z0-9._/-]+$/.test(v) && !/^(-|\/|origin\/|refs\/)|\/$|\.\.|\/\/|\.lock$|^HEAD$|(^|\/)\./.test(v)
 const str = (fix) => (v) => typeof v === "string" && v.length > 0 ? null : fix
 const CONFIG_SCHEMA = {
   designSystem: { required: true, check: (v) => isUrl(v) ? null : "set it to the design system's claude.ai link" },
@@ -225,13 +260,15 @@ const CONFIG_SCHEMA = {
   systemIn: { required: false, check: str('set it to the System section snapshot path, normally ".ttt/system.md"') },
   tokensOut: { required: true, check: (v) => typeof v === "string" && v.endsWith(".css") ? null : 'set it to the generated token file, e.g. "src/styles/ds-tokens.css"' },
   lastSynced: { required: true, check: (v) => typeof v === "string" && /^\d{4}-\d\d-\d\dT\d\d:\d\d(:\d\d)?(\.\d+)?Z$/.test(v) && !isNaN(Date.parse(v)) ? null : 'use an RFC 3339 UTC time from the system clock, e.g. "2026-10-07T18:01:26Z"' },
+  // The branch design/* branches are cut from and their PRs go into (common.md, "The integration branch").
+  integrationBranch: { required: false, check: (v) => isBranchName(v) ? null : 'the branch name alone, as the remote has it: "develop", not "origin/develop" or "refs/heads/develop"' },
   typeClassPrefix: { required: true, check: (v) => typeof v === "string" && /^[a-z][a-z0-9-]*-$/.test(v) ? null : 'lowercase, ending in "-", e.g. "type-"' },
   // The preview bundle's global and its extra exports, retired with the bundle in kit 0.37.0: accepted and ignored.
   namespace: { required: false, check: () => null },
   bundleExtras: { required: false, check: () => null },
   componentFiles: { required: false, check: (v) => isObject(v) && Object.entries(v).every(([k, a]) => /^[A-Z][A-Za-z0-9]*$/.test(k) && Array.isArray(a) && a.length && a.every((f) => typeof f === "string" && /^[a-z0-9-]+\.tsx$/.test(f))) ? null : 'map each PascalCase component to its .tsx files, e.g. {"Input": ["input.tsx", "label.tsx"]}' },
   framework: { required: false, check: (v) => v in FRAMEWORKS ? null : v === "next" ? 'Next.js is no longer supported (dropped in kit 0.30.0): the kit supports "vite"' : '"vite", the only framework the kit supports' },
-  contrast: { required: false, check: (v) => isObject(v) ? null : 'an object: { "intentional": [{ "foreground", "background"?, "reason" }] }' },
+  contrast: { required: false, check: (v) => isObject(v) ? null : 'an object: { "intentional": [{ "foreground", "background", "themes"?, "exempt", "reason" }], "pairs"?: [{ "foreground", "background", "min", "why" }], "charts"?: "labelled" }' },
   usingInCode: { required: false, check: (v) => isObject(v) ? null : 'an object: { "notes": ["…"] }' },
   // Setup under way. "template": a starter template on the kit's default look,
   // not yet named for a project (/ds-setup start adopts it). "awaiting-design":
@@ -239,6 +276,15 @@ const CONFIG_SCHEMA = {
   // system yet. Finish removes it with the link in place.
   setup: { required: false, check: (v) => v === AWAITING_DESIGN || v === TEMPLATE ? null : `"${TEMPLATE}" in a starter template, "${AWAITING_DESIGN}" while Setup waits on its design phase; /ds-setup finish removes it` },
 }
+
+/**
+ * The cases a contrast waiver may claim (`contrast.intentional[].exempt`):
+ * where WCAG AA doesn't ask for the ratio. inactive: a disabled control
+ * (1.4.3's and 1.4.11's exception); labelled: a chart whose series are
+ * labelled directly; not-drawn: the pair never appears on screen; decorative:
+ * it carries no meaning.
+ */
+export const EXEMPT = ["inactive", "labelled", "not-drawn", "decorative"]
 
 /** The config's `setup` value between Setup's start phase and its finish. */
 export const AWAITING_DESIGN = "awaiting-design"
@@ -256,7 +302,7 @@ const NOT_YET = {
 const isPlaceholder = (v) => typeof v === "string" && /^\{\{[A-Z_]+\}\}$/.test(v)
 
 /** Every key of the config against the schema. `placeholders` accepts "{{…}}" values. */
-function checkConfig(config, err, { placeholders = false } = {}) {
+function checkConfig(config, err, { placeholders = false, warn = () => {} } = {}) {
   for (const [key, rule] of Object.entries(CONFIG_SCHEMA)) {
     if (!(key in config)) {
       // No design system (and, in a template, no project) exists yet.
@@ -274,12 +320,36 @@ function checkConfig(config, err, { placeholders = false } = {}) {
   }
   if (isObject(config.contrast)) {
     const list = config.contrast.intentional ?? []
-    if (!Array.isArray(list)) err("contrast.intentional", "isn't a list", "a list of { foreground, background?, reason }")
+    if (!Array.isArray(list)) err("contrast.intentional", "isn't a list", "a list of { foreground, background, themes?, reason }")
     else list.forEach((x, i) => {
-      if (!isObject(x) || typeof x.foreground !== "string" || typeof x.reason !== "string" || !x.reason.trim())
-        err(`contrast.intentional[${i}]`, `is ${JSON.stringify(x)}`, 'give a foreground token and a reason, e.g. { "foreground": "label-disable", "reason": "…" }')
+      if (!isObject(x) || typeof x.foreground !== "string" || typeof x.reason !== "string" || !x.reason.trim()) {
+        err(`contrast.intentional[${i}]`, `is ${JSON.stringify(x)}`, 'give a foreground, a background and a reason, e.g. { "foreground": "label-disable", "background": "background-normal", "reason": "…" }')
+        return
+      }
+      if (x.background !== undefined && typeof x.background !== "string") err(`contrast.intentional[${i}].background`, `is ${JSON.stringify(x.background)}`, "name one background token")
+      if (x.themes !== undefined && !(Array.isArray(x.themes) && x.themes.length && x.themes.every((t) => typeof t === "string")))
+        err(`contrast.intentional[${i}].themes`, `is ${JSON.stringify(x.themes)}`, 'list the themes it excuses, e.g. ["light"], or leave it out for every theme')
+      if (x.exempt !== undefined && !EXEMPT.includes(x.exempt))
+        err(`contrast.intentional[${i}].exempt`, `is ${JSON.stringify(x.exempt)}`, `one of ${EXEMPT.join(", ")}: the case WCAG AA leaves open. A miss AA does apply to can't be waived: change a colour`)
+      // A warning in kit 0.42.0, an error in the next release.
+      if (x.exempt === undefined)
+        warn(`contrast.intentional[${i}]`, `(${x.foreground}) says no "exempt": which case WCAG AA leaves open`, `add "exempt": one of ${EXEMPT.join(", ")} (inactive: a disabled control; labelled: a chart labelled directly; not-drawn: the pair never appears on screen; decorative: it carries no meaning)`)
+      // A warning in kit 0.42.0, an error in the next release.
+      if (x.background === undefined)
+        warn(`contrast.intentional[${i}]`, `(${x.foreground}) names no background, so it excuses ${x.foreground} on every background, pairs added later included`, `add the "background" the reason is about, e.g. "background": "background-normal"; one entry per pair`)
     })
-    for (const key of Object.keys(config.contrast)) if (key !== "intentional") err(`contrast.${key}`, "isn't a key this kit knows", 'the only key is "intentional"')
+    const pairs = config.contrast.pairs ?? []
+    const names = (v) => typeof v === "string" || (Array.isArray(v) && v.length && v.every((n) => typeof n === "string"))
+    if (!Array.isArray(pairs)) err("contrast.pairs", "isn't a list", "a list of { foreground, background, min, why }")
+    else pairs.forEach((x, i) => {
+      if (!isObject(x) || !names(x.foreground) || !names(x.background) || typeof x.min !== "number" || x.min < 1 || typeof x.why !== "string" || !x.why.trim())
+        err(`contrast.pairs[${i}]`, `is ${JSON.stringify(x)}`, 'give a foreground and a background (a token name or a list), min (4.5 for text, 3 for large text, icons, borders and chart series) and why, e.g. { "foreground": "label-assistive", "background": "fill-input", "min": 4.5, "why": "placeholders in fields" }')
+      else if (x.themes !== undefined && !(Array.isArray(x.themes) && x.themes.every((t) => typeof t === "string")))
+        err(`contrast.pairs[${i}].themes`, `is ${JSON.stringify(x.themes)}`, "list the themes the pair is drawn in, or leave it out")
+    })
+    if (config.contrast.charts !== undefined && config.contrast.charts !== "labelled")
+      err("contrast.charts", `is ${JSON.stringify(config.contrast.charts)}`, '"labelled" when every chart labels its series directly (the chart-series pairs are then waived), or leave it out')
+    for (const key of Object.keys(config.contrast)) if (!["intentional", "pairs", "charts"].includes(key)) err(`contrast.${key}`, "isn't a key this kit knows", 'the keys are "intentional", "pairs" and "charts"')
   }
   if (isObject(config.usingInCode)) {
     const notes = config.usingInCode.notes ?? []
@@ -317,7 +387,7 @@ export function validate(repo, { preflight = false, testedRange, system, tokens:
     return { errors, warnings, notes }
   }
 
-  checkConfig(config, err)
+  checkConfig(config, err, { warn })
   const setupUnderWay = config.setup === AWAITING_DESIGN || config.setup === TEMPLATE
   if (config.setup === TEMPLATE) notes.push("A starter template on the kit's default look: no project, design system or System section yet (/ds-setup start adopts it for a project)")
   else if (setupUnderWay) notes.push("Setup is waiting on its design phase: no design system or System section yet (/ds-setup design, then /ds-setup finish)")
@@ -360,8 +430,12 @@ export function validate(repo, { preflight = false, testedRange, system, tokens:
       try { tokens = JSON.parse(readFileSync(tokensPath, "utf8")) }
       catch (e) { err(tokensName, `isn't valid JSON (${e.message})`, "re-pull it from the design system") }
       if (tokens) {
+        const before = errors.length
         validateTokens(tokens, tokensName, err, warn)
         checkClientRamps(tokens, tokensName, system, warn, notes)
+        checkChartCount(tokens, tokensName, system, warn)
+        // Contrast needs tokens it can resolve: only once the snapshot itself is sound.
+        if (errors.length === before) checkContrast(tokens, config, err, warn, notes)
       }
     }
   }
@@ -458,6 +532,9 @@ function validateTokens(tokens, file, err, warn) {
       if (m) {
         if (!colours.has(m[1])) err(where(t.name), `(${theme}) aliases {${m[1]}}, which isn't a colour token`, "point it at an existing colour token or use a literal")
         else if (m[1] === t.name) err(where(t.name), `(${theme}) aliases itself`, "point it at a primitive")
+        // A primitive may alias a step of another ramp (two ramps sharing a colour), holding a value itself.
+        else if (isPrimitive(t) && !isPrimitive(colours.get(m[1]))) err(where(t.name), `is a primitive aliasing {${m[1]}}, which isn't one`, "a primitive holds a value, or aliases another ramp's step; never a semantic token")
+        else if (isPrimitive(t) && ALIAS.test(String(colours.get(m[1]).value).trim())) err(where(t.name), `aliases {${m[1]}}, itself an alias`, `point it at the step that holds the value, ${String(colours.get(m[1]).value).trim()}`)
       } else if (!isColour(v)) {
         err(where(t.name), `(${theme}) is ${JSON.stringify(v)}, not a colour the design system reads`, "use hex, rgb(), hsl() or oklch() with no function inside; no named colours, var() or color-mix()")
       }
@@ -499,9 +576,14 @@ function validateTokens(tokens, file, err, warn) {
   }
 
   // The semantic tokens the profile's mapping needs.
-  const required = new Set([...Object.values(SHADCN_MAP), ...Object.values(ALIAS_COLORS)])
+  const required = new Set([...Object.values(SHADCN_MAP), ...Object.values(ALIAS_COLORS)].filter((n) => !OPTIONAL_CHARTS.includes(n)))
   for (const name of required) if (!colours.has(name))
     err(where(name), "is missing; the profile's token mapping needs it", "add it in the design system (a semantic token aliasing a primitive), then re-pull")
+  // Chart colours: as many as design uses, from chart-1 with no gap.
+  for (const name of OPTIONAL_CHARTS) {
+    const before = `chart-${Number(name.slice(6)) - 1}`
+    if (colours.has(name) && !colours.has(before)) err(where(name), `is there but ${before} isn't`, `chart colours run from chart-1 with no gap: add ${before}, or rename the last one`)
+  }
 
   // Scalars.
   for (const family of ["spacing", "radius"]) {
@@ -563,6 +645,56 @@ function validateTokens(tokens, file, err, warn) {
 }
 
 /**
+ * Every contrast pair in every theme (ds-contrast.mjs's check, with the kit's
+ * contrast-pairs.json), so the repo's tests fail on a miss in CI. A miss the
+ * config's `contrast.intentional` excuses passes; a pair naming a token the
+ * snapshot lacks can't be checked (a warning); an entry that excuses nothing
+ * now is stale (a warning).
+ */
+function checkContrast(tokens, config, err, warn, notes) {
+  if (!contrastCheck) {
+    notes.push("contrast not checked: scripts/ds-contrast.mjs and scripts/contrast-pairs.json aren't beside ds-validate.mjs (/ds-upgrade adds them)")
+    return
+  }
+  const intentional = Array.isArray(config.contrast?.intentional) ? config.contrast.intentional.filter(isObject) : []
+  let result
+  const pairs = Array.isArray(config.contrast?.pairs) ? config.contrast.pairs.filter(isObject) : []
+  try { result = contrastCheck.check(tokens, contrastCheck.pairs, intentional, { pairs, charts: config.contrast?.charts }) }
+  catch (e) { err("contrast", `can't be checked: ${e.message}`, "fix the token snapshot, then run ds-contrast.mjs"); return }
+  for (const row of result.rows) {
+    const pair = `contrast › ${row.foreground} on ${row.background}`
+    // A pair the config declares names a token on purpose; a kit pair may name one this system doesn't draw.
+    if (row.status === "error" && row.client) err(pair, `can't be checked: ${row.problems.join("; ")}`, "fix the name in contrast.pairs, or add the token to the snapshot")
+    else if (row.status === "error") warn(pair, `isn't checked: ${row.problems.join("; ")}`, "add the token in the design system, or ignore this if the system doesn't draw that pair")
+    else if (row.status === "fail") {
+      const misses = Object.entries(row.ratios).filter(([, x]) => x + 1e-9 < row.min).map(([t, x]) => `${x.toFixed(2)}:1 in ${t}`)
+      err(pair, `is ${misses.join(", ")}, below ${row.min}:1 (${row.why})`, "a design decision: change a colour in /ds-change, or record why it's fine under contrast.intentional (its foreground, background and reason)")
+    }
+  }
+  for (const x of result.stale)
+    warn(`contrast.intentional › ${x.foreground}${x.background ? ` on ${x.background}` : ""}`, "excuses no failing pair now", "remove it, so it can't excuse a later miss")
+}
+
+/**
+ * A system with fewer than five chart colours says so in the System section's
+ * client-specific choices, naming its last one (`chart-4`) and what happens
+ * past it ("further series grouped as Other"): a drift warning otherwise.
+ */
+function checkChartCount(tokens, file, system, warn) {
+  const names = new Set((tokens.color?.tokens ?? []).map((t) => t?.name))
+  // A chart colour that aliases another repeats it: two series in one colour.
+  for (const t of tokens.color?.tokens ?? []) {
+    if (!/^chart-\d$/.test(t?.name ?? "") || !isObject(t.value)) continue
+    const other = Object.values(t.value).map((v) => /^\{(chart-\d)\}$/.exec(String(v).trim())?.[1]).find(Boolean)
+    if (other) warn(`${file} › ${t.name}`, `aliases {${other}}, so two series share a colour`, `remove ${t.name} if the charts use fewer colours (the System section says how many), or give it its own colour`)
+  }
+  const count = ["chart-1", ...OPTIONAL_CHARTS].filter((n) => names.has(n)).length
+  if (count === 0 || count === 5 || !system || !existsSync(system)) return
+  if (!listedInSystem(readFileSync(system, "utf8")).has(`chart-${count}`))
+    warn(`${file} › chart-*`, `has ${count} chart colour(s), and the System section doesn't say so`, `add a client-specific choice naming \`chart-${count}\`, e.g. "${count} chart colours (\`chart-1\`–\`chart-${count}\`); further series grouped as Other"`, "drift")
+}
+
+/**
  * Client-added ramps (any primitive ramp beyond the standard roles) must be
  * recorded in the System section's client-specific choices. With `system`
  * (a copy of the design system's 01-system.md) each one not named there is a
@@ -570,7 +702,15 @@ function validateTokens(tokens, file, err, warn) {
  */
 function checkClientRamps(tokens, file, system, warn, notes) {
   const prims = (tokens.color?.tokens ?? []).filter((t) => TOKEN_NAME.test(t?.name ?? "") && isPrimitive(t))
-  const added = [...new Set(prims.map((t) => rampOf(t.name)))].filter((r) => !STANDARD_RAMPS.includes(r) && !hueIn(r))
+  const have = new Set(prims.map((t) => rampOf(t.name)))
+  const added = [...have].filter((r) => !STANDARD_RAMPS.includes(r) && !hueIn(r))
+  // An optional ramp design went without: the System section says so, naming it, with what its tokens alias.
+  const without = have.has("brand-primary") ? OPTIONAL_RAMPS.filter((r) => !have.has(r)) : []
+  if (without.length && system && existsSync(system)) {
+    const listed = listedInSystem(readFileSync(system, "utf8"))
+    for (const ramp of without) if (!listed.has(ramp))
+      warn(`${file} › ${ramp}-*`, "isn't in the tokens, and the System section doesn't say so", `add a client-specific choice naming it, e.g. "No \`${ramp}\` ramp: its tokens alias \`brand-primary\`"`, "drift")
+  }
   if (!added.length) return
   if (!system) {
     notes.push(`client-added ramps ${added.join(", ")} — not checked against the System section (set systemIn, or pass --system <01-system.md>)`)
@@ -804,7 +944,7 @@ export function validateTemplate(configPath, tokensPath) {
   let config
   try { config = JSON.parse(readFileSync(configPath, "utf8")) }
   catch (e) { err(configPath, `can't be read (${e.message})`, "fix the file"); return { errors, warnings } }
-  checkConfig(config, err, { placeholders: true })
+  checkConfig(config, err, { placeholders: true, warn })
   if (config.kitVersion !== KIT_VERSION)
     err("kitVersion", `is ${config.kitVersion} in the config template; these scripts are ${KIT_VERSION}`, "bump the template with the scripts")
   const filled = [JSON.stringify(config).match(/\{\{[A-Z_]+\}\}/g) ?? []].flat()
@@ -824,24 +964,46 @@ export function validateTemplate(configPath, tokensPath) {
 export const DESIGN_ENTRY = ["design.html", "src/design/"]
 
 /**
+ * A stable export (since kit 0.40.0): a repo's own checks may import it, and
+ * `--print-design-paths` prints it. Its name, argument and result keep their
+ * shape across releases; a change to them is a breaking release.
+ *
  * The paths a designer's `design/*` branch may change, relative to the app's
  * folder: the token source and the token file (`.ttt/design-system.json` →
- * `tokensIn`, `tokensOut`), the component folder (`components.json` →
- * `aliases.ui`) and the design entry. A path ending in "/" is a folder.
+ * `tokensIn`, `tokensOut`), the System section snapshot (`systemIn`, which a
+ * designer's restyle or tweak rewrites), the component folder
+ * (`components.json` → `aliases.ui`) and the design entry. A path ending in
+ * "/" is a folder. The config itself isn't one: `designScope` counts a change
+ * to its `contrast` key alone as design's (CONFIG_DESIGN_KEYS).
  * Throws when the config or the component folder can't be read.
  */
 export function designPaths(repo) {
   const configPath = join(repo, ".ttt/design-system.json")
   if (!existsSync(configPath)) throw new Error(".ttt/design-system.json not found — run it in the app's folder, or pass --repo <app>")
-  const { tokensIn, tokensOut } = JSON.parse(readFileSync(configPath, "utf8"))
+  const { tokensIn, tokensOut, systemIn } = JSON.parse(readFileSync(configPath, "utf8"))
   const ui = uiDir(repo)
   if (!ui) throw new Error("components.json › aliases.ui doesn't resolve through tsconfig.json's paths, so the component folder is unknown")
   const rel = (p) => relative(repo, resolve(repo, p)).split("\\").join("/")
-  return [tokensIn, tokensOut, `${rel(ui)}/`, ...DESIGN_ENTRY].filter(Boolean).map((p) => (p.endsWith("/") ? p : rel(p)))
+  return [tokensIn, tokensOut, systemIn, `${rel(ui)}/`, ...DESIGN_ENTRY].filter((p) => typeof p === "string" && p).map((p) => (p.endsWith("/") ? p : rel(p)))
+}
+
+/** The config keys that are design's to change on a design/* branch: the contrast pairs and waivers design decides. */
+export const CONFIG_DESIGN_KEYS = ["contrast"]
+
+/** Whether two configs differ only in CONFIG_DESIGN_KEYS. Unreadable JSON on either side counts as a difference. */
+export function configChangeIsDesigns(before, after) {
+  try {
+    const strip = (text) => JSON.stringify(Object.entries(JSON.parse(text)).filter(([k]) => !CONFIG_DESIGN_KEYS.includes(k)))
+    return strip(before) === strip(after)
+  } catch { return false }
 }
 
 /** Whether a path relative to the app's folder is one of `paths`. */
 export const inDesignScope = (file, paths) => paths.some((p) => (p.endsWith("/") ? file.startsWith(p) : file === p))
+
+// The repo variables git exports to a hook. Filtered out rather than deleted,
+// so a client's lint (typescript/no-dynamic-delete) passes this file.
+const HOOK_GIT_VARS = new Set(["GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_PREFIX"])
 
 /**
  * Every file the branch changes since it left `base` (`git diff base...HEAD`,
@@ -851,8 +1013,12 @@ export const inDesignScope = (file, paths) => paths.some((p) => (p.endsWith("/")
  * `{ outside, changed, paths, prefix }`; throws when git can't diff against `base`.
  */
 export function designScope(repo, base) {
+  // A git hook runs with GIT_DIR (and sometimes GIT_WORK_TREE, GIT_INDEX_FILE,
+  // GIT_PREFIX) set, which overrides -C: the prefix comes out empty and every
+  // file in a monorepo's app reads as outside. Drop them so -C <repo> decides.
+  const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => !HOOK_GIT_VARS.has(k)))
   const git = (...a) => {
-    const r = spawnSync("git", ["-C", repo, ...a], { encoding: "utf8" })
+    const r = spawnSync("git", ["-C", repo, ...a], { encoding: "utf8", env })
     if (r.status !== 0) throw new Error(`git ${a.join(" ")} failed: ${(r.stderr || r.error?.message || "").trim()}`)
     return r.stdout
   }
@@ -860,11 +1026,18 @@ export function designScope(repo, base) {
   git("rev-parse", "--verify", "--quiet", `${base}^{commit}`)
   const changed = git("-c", "core.quotepath=off", "diff", "--name-only", "--no-renames", `${base}...HEAD`).split("\n").filter(Boolean)
   const paths = designPaths(repo)
-  const outside = changed.filter((f) => !(f.startsWith(prefix) && inDesignScope(f.slice(prefix.length), paths)))
+  // The config, when the branch changed only its design keys (a waiver design chose), is design's too.
+  const config = `${prefix}.ttt/design-system.json`
+  const show = (rev) => { try { return git("show", `${rev}:${config}`) } catch { return null } }
+  const designs = (f) => f === config && (() => {
+    const before = show(git("merge-base", base, "HEAD").trim()), after = show("HEAD")
+    return before != null && after != null && configChangeIsDesigns(before, after)
+  })()
+  const outside = changed.filter((f) => !(f.startsWith(prefix) && inDesignScope(f.slice(prefix.length), paths)) && !designs(f))
   return { outside, changed, paths: paths.map((p) => prefix + p), prefix }
 }
 
-function mainDesignScope(repo, base) {
+function mainDesignScope(repo, base, { advisory = false } = {}) {
   let result
   try { result = designScope(repo, base) }
   catch (e) {
@@ -879,7 +1052,10 @@ function mainDesignScope(repo, base) {
     console.log("A design/* branch changes only the design paths:")
     for (const p of paths) console.log(`  ${p}`)
     console.log("For the dev: review these changes, move them to a dev branch, or merge knowingly. The designer isn't asked to fix this.")
-    process.exit(1)
+    // Advisory: CI stays green. On GitHub Actions each file is a warning annotation on the PR.
+    if (advisory && process.env.GITHUB_ACTIONS === "true")
+      for (const f of outside) console.log(`::warning file=${f}::Outside the design paths: a dev reviews it on this design PR`)
+    process.exit(advisory ? 0 : 1)
   }
   console.log(`in scope — ${changed.length} changed file(s), all in the design paths (${paths.join(", ")})`)
   process.exit(0)
@@ -891,10 +1067,15 @@ function main() {
   const args = process.argv.slice(2)
   const flag = (n) => { const i = args.indexOf(n); return i === -1 ? null : args[i + 1] }
   const repo = resolve(flag("--repo") ?? process.cwd())
+  if (args.includes("--print-design-paths")) {
+    try { console.log(designPaths(repo).join("\n")) }
+    catch (e) { console.error(`error    design paths: ${e.message}`); process.exit(2) }
+    process.exit(0)
+  }
   if (args.includes("--design-scope")) {
     const base = flag("--design-scope")
     if (!base || base.startsWith("--")) { console.log("error    --design-scope needs the base ref, e.g. --design-scope origin/develop"); process.exit(2) }
-    return mainDesignScope(repo, base)
+    return mainDesignScope(repo, base, { advisory: args.includes("--advisory") })
   }
   const { errors, warnings, notes } = args.includes("--template")
     ? validateTemplate(resolve(flag("--template")), resolve(flag("--tokens")))

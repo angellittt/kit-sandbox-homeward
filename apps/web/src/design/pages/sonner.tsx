@@ -1,8 +1,9 @@
-// design-system-kit 0.38.0 · profile shadcn · design entry: the Sonner page
+// design-system-kit 0.45.0 · profile shadcn · design entry: the Sonner page
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
+import { Labelled, Property } from "../labels";
 
 export const SonnerPreview = () => {
   useEffect(() => {
@@ -14,26 +15,33 @@ export const SonnerPreview = () => {
     toast.success("Changes saved", { duration: Infinity });
   }, []);
   return (
-    <div className="row">
-      <Button
-        variant="outline"
-        onClick={() => {
-          toast("Board archived");
-        }}
-      >
-        Show toast
-      </Button>
-      <Button
-        variant="outline"
-        onClick={() => {
-          toast.error("Couldn’t sync", {
-            description: "We’ll try again in a minute.",
-          });
-        }}
-      >
-        Show error
-      </Button>
-      <Toaster position="bottom-right" />
-    </div>
+    <>
+      <Property name="On load: a toast with description and action, and a success toast" />
+      <div className="row">
+        <Labelled label="default toast">
+          <Button
+            variant="outline"
+            onClick={() => {
+              toast("Board archived");
+            }}
+          >
+            Show toast
+          </Button>
+        </Labelled>
+        <Labelled label="error toast">
+          <Button
+            variant="outline"
+            onClick={() => {
+              toast.error("Couldn’t sync", {
+                description: "We’ll try again in a minute.",
+              });
+            }}
+          >
+            Show error
+          </Button>
+        </Labelled>
+        <Toaster position="bottom-right" />
+      </div>
+    </>
   );
 };

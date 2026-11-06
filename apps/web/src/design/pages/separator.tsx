@@ -1,5 +1,6 @@
-// design-system-kit 0.38.0 · profile shadcn · design entry: the Separator page
+// design-system-kit 0.45.0 · profile shadcn · design entry: the Separator page
 import { Separator } from "@/components/ui/separator";
+import { Labelled } from "../labels";
 
 export const SeparatorPreview = () => {
   return (
@@ -8,7 +9,9 @@ export const SeparatorPreview = () => {
         <p style={{ margin: 0, fontWeight: 600 }}>Account</p>
         <p className="note">Name, email and password.</p>
       </div>
-      <Separator />
+      <Labelled label="horizontal">
+        <Separator />
+      </Labelled>
       <div>
         <p style={{ margin: 0, fontWeight: 600 }}>Notifications</p>
         <p className="note">What we send and when.</p>
