@@ -5,6 +5,7 @@
   "profile": "shadcn",
   "framework": "vite",
   "kitVersion": "0.38.0",
+  "integrationBranch": "main",
   "tokensIn": ".ttt/tokens.json",
   "systemIn": ".ttt/system.md",
   "tokensOut": "src/styles/ds-tokens.css",
