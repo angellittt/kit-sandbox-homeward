@@ -24,6 +24,8 @@
     "intentional": [
       {
         "foreground": "label-disable",
+        "background": "background-normal",
+        "exempt": "inactive",
         "reason": "disabled text is intentionally below 4.5:1 and always paired with a disabled control"
       }
     ]
