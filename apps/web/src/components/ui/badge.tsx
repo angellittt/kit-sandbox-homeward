@@ -8,6 +8,7 @@
  * - tone neutral | primary | secondary | accent | info | positive | cautionary | negative (Semantic colour): sets --t-soft/--t-text/--t-solid/--t-on; data-tone.
  * - variant gains soft | solid, which read the tone's --t-* values. A tone with no variant renders soft; stock variants are unchanged and ignore tone.
  * - Layer and icon tokens: icon sizes `size-3`/`3.5`/`4`/`5` -> `size-(--icon-xs|sm|md|lg)`, so stacking and icon size are token changes (variable forms keep tailwind-merge overrides working).
+ * - Client (design tweak, 2026-11-10): base height `h-5` -> `h-6` (`space-5` -> `space-6`, 24px), so status pills and tags read at the size the screens draw them (screen review of the animal profile).
  */
 import * as React from "react";
 import { mergeProps } from "@base-ui/react/merge-props";
@@ -16,7 +17,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "cn";
 
 const badgeVariants = cva(
-  "group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-4xl border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-(--icon-xs)!",
+  "group/badge inline-flex h-6 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-4xl border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-(--icon-xs)!",
   {
     variants: {
       variant: {
