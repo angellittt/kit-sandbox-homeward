@@ -1,4 +1,4 @@
-# design-system-kit 0.45.0 · profile shadcn · wiring (CI): GitHub Actions, design branches, toolchain from mise.toml
+# design-system-kit 0.53.0 · profile shadcn · wiring (CI): GitHub Actions, design branches, toolchain from mise.toml
 #
 # github-design.yml for a repo whose toolchain is mise.toml (TTT's starter
 # template and the repos spun up from it): Setup copies this one instead, to

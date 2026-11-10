@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the Toggle page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the Toggle page
 import { useState } from "react";
 import { Bold, Italic, Star, Underline } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
@@ -14,17 +14,17 @@ export const TogglePreview = () => {
       <div className="row">
         <Labelled label="pressed">
           <Toggle aria-label="Bold" pressed={b} onPressedChange={setB}>
-            <Bold size={16} />
+            <Bold width={16} height={16} />
           </Toggle>
         </Labelled>
         <Labelled label="default">
           <Toggle aria-label="Italic" pressed={i} onPressedChange={setI}>
-            <Italic size={16} />
+            <Italic width={16} height={16} />
           </Toggle>
         </Labelled>
         <Labelled label="disabled">
           <Toggle aria-label="Underline" disabled>
-            <Underline size={16} />
+            <Underline width={16} height={16} />
           </Toggle>
         </Labelled>
       </div>
@@ -37,7 +37,7 @@ export const TogglePreview = () => {
             pressed={s}
             onPressedChange={setS}
           >
-            <Star size={16} data-icon="inline-start" />
+            <Star width={16} height={16} data-icon="inline-start" />
             Starred only
           </Toggle>
         </Labelled>

@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the specs
+// design-system-kit 0.53.0 · profile shadcn · design entry: the specs
 //
 // What a designer reads beside a preview: a token as a swatch or a shape with
 // its live value and usage note, and under each component page, what it is

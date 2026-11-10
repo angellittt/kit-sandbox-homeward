@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the foundations
+// design-system-kit 0.53.0 · profile shadcn · design entry: the foundations
 //
 // The tokens themselves, one page per kind, above the components in the
 // shell: colour (the semantic tokens, then the primitive ramps they point

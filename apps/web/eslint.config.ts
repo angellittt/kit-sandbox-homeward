@@ -1,7 +1,7 @@
 import reactEslintConfig from "@repo/eslint-config/eslint.react.config";
 import { disableRulesCoveredByOxlint } from "@repo/eslint-config/oxlint";
 import { defineConfig } from "eslint/config";
-// design-system-kit 0.45.0 · profile shadcn · wiring (Vite): ESLint, for a TypeScript config
+// design-system-kit 0.53.0 · profile shadcn · wiring (Vite): ESLint, for a TypeScript config
 import type { ESLint, Linter, Rule } from "eslint";
 import { builtinRules } from "eslint/use-at-your-own-risk";
 
@@ -27,25 +27,27 @@ const DS_STYLE_RULES = new Set([
   "sort-imports",
 ]);
 
-// The repo's style rules, off for the vendored files only: every rule ESLint
-// types "layout" (formatting), and the rules DS_STYLE_RULES names. Everything
-// else stays on — correctness, security, hooks and accessibility among it.
-// Only rules the repo turns on are named. (Where oxlint runs the accessibility
-// rules, its override turns a few off for the stock files that need it:
-// oxlint.design-system.jsonc.) Maps rather than object lookups, so a repo's
-// security rules don't flag it.
+// The repo's entries flattened: each entry's `extends` (create-vite's presets
+// sit there, and defineConfig only spreads them after this block runs) before
+// the entry itself. A string in `extends` names a plugin's config the entry
+// loads by name; it's skipped.
 type DsRule = { meta?: { type?: string } };
-// The few node fields dsIsLink reads, JSX's among them.
-type DsNode = {
-  type: string;
-  parent?: DsNode;
-  name?: { name?: string };
-  key?: { name?: string; value?: string };
-  left?: { property?: { name?: string } };
-};
-const dsStyleRulesOff = (entries: Linter.Config[]): Linter.Config => {
+type DsEntry = Linter.Config & { extends?: unknown[] };
+const dsFlat = (entries: unknown[]): DsEntry[] =>
+  entries.flatMap((e): DsEntry[] => {
+    if (Array.isArray(e)) return dsFlat(e);
+    if (!e || typeof e !== "object") return [];
+    const entry = e as DsEntry;
+    return [
+      ...dsFlat((entry.extends ?? []).filter((x) => typeof x !== "string")),
+      entry,
+    ];
+  });
+// Every plugin the repo loads, by its name there: name → (rule name → rule).
+// Maps rather than object lookups, so a repo's security rules don't flag it.
+const dsPlugins = (flat: DsEntry[]): Map<string, Map<string, DsRule>> => {
   const plugins = new Map<string, Map<string, DsRule>>();
-  for (const e of entries) {
+  for (const e of flat) {
     for (const [name, plugin] of Object.entries(e.plugins ?? {})) {
       plugins.set(
         name,
@@ -57,8 +59,29 @@ const dsStyleRulesOff = (entries: Linter.Config[]): Linter.Config => {
       );
     }
   }
+  return plugins;
+};
+
+// The few node fields dsIsLink reads, JSX's among them.
+type DsNode = {
+  type: string;
+  parent?: DsNode;
+  name?: { name?: string };
+  key?: { name?: string; value?: string };
+  left?: { property?: { name?: string } };
+};
+
+// The repo's style rules, off for the vendored files only: every rule ESLint
+// types "layout" (formatting), and the rules DS_STYLE_RULES names. Everything
+// else stays on — correctness, security, hooks and accessibility among it.
+// Only rules the repo turns on are named. (Where oxlint runs the accessibility
+// rules, its override turns a few off for the stock files that need it:
+// oxlint.design-system.jsonc.)
+const dsStyleRulesOff = (entries: unknown[]): Linter.Config => {
+  const flat = dsFlat(entries);
+  const plugins = dsPlugins(flat);
   const on = new Set<string>();
-  for (const e of entries) {
+  for (const e of flat) {
     for (const [id, setting] of Object.entries(e.rules ?? {})) {
       const level = Array.isArray(setting) ? setting[0] : setting;
       if (level === "off" || level === 0) on.delete(id);
@@ -78,6 +101,45 @@ const dsStyleRulesOff = (entries: Linter.Config[]): Linter.Config => {
     files: DS_VENDORED,
     rules: Object.fromEntries(style.map((id) => [id, "off"])),
   };
+};
+
+// Checks a React app's own presets run (create-vite 8's, on Vite 7: react-refresh's
+// `vite`, react-hooks' `recommended-latest`, typescript-eslint's `recommended`)
+// that kit and stock files fail by design, off for the files that fail them,
+// by name — as the oxlint override does. Each is named only where the repo
+// loads a plugin with that rule, so a repo without React's presets gets
+// nothing new (ESLint itself accepts an unknown rule set to "off").
+const DS_VENDORED_RULES_OFF: [string[], string[]][] = [
+  // cva variant helpers, and DatePicker's and DataTable's documented helpers,
+  // are exported beside the component by design; any component may have one.
+  [["src/components/ui/**"], ["react-refresh/only-export-components"]],
+  // Stock: use-mobile reads the breakpoint, and Carousel its API, in an effect.
+  [
+    ["src/hooks/use-mobile.ts", "src/components/ui/carousel.tsx"],
+    ["react-hooks/set-state-in-effect"],
+  ],
+  // DataTable: the React Compiler can't memoize TanStack Table's hook, which is
+  // expected; its ColumnMeta augmentation has to repeat TanStack's type
+  // parameters, unused, or TypeScript rejects the merge.
+  [
+    ["src/components/ui/data-table.tsx"],
+    ["react-hooks/incompatible-library", "@typescript-eslint/no-unused-vars"],
+  ],
+];
+const dsVendoredRulesOff = (entries: unknown[]): Linter.Config[] => {
+  const plugins = dsPlugins(dsFlat(entries));
+  const known = (id: string): boolean => {
+    const slash = id.lastIndexOf("/");
+    return slash === -1
+      ? builtinRules.has(id)
+      : Boolean(plugins.get(id.slice(0, slash))?.has(id.slice(slash + 1)));
+  };
+  return DS_VENDORED_RULES_OFF.map(
+    ([files, ids]): Linter.Config => ({
+      files,
+      rules: Object.fromEntries(ids.filter(known).map((id) => [id, "off"])),
+    }),
+  ).filter((e) => Object.keys(e.rules ?? {}).length > 0);
 };
 
 // ---- design-system-kit: tokens only -----------------------------------------
@@ -337,11 +399,13 @@ const designEntryOut: Linter.Config = {
 };
 // ---- end design entry -----------------------------------------------------------
 
-const withDesignSystem = (entries: Linter.Config[]): Linter.Config[] => [
+// Generic, so an entry with `extends` (create-vite's) passes through to defineConfig as it is.
+const withDesignSystem = <T>(entries: T[]): (T | Linter.Config)[] => [
   ...entries,
   tokensOnly,
   designEntryOut,
   dsStyleRulesOff(entries),
+  ...dsVendoredRulesOff(entries),
   // The kit files a repo carries for its CI check are linted in the kit.
   {
     ignores: [

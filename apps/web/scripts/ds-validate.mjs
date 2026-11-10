@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// design-system-kit 0.45.0 · profile shadcn · kit file — fix it in the kit, not per client
+// design-system-kit 0.53.0 · profile shadcn · kit file — fix it in the kit, not per client
 /**
  * ds-validate.mjs — the contract's config validation.
  *
@@ -55,14 +55,14 @@
  * (ds-drift.test.mjs).
  */
 
-import { readFileSync, existsSync } from "node:fs"
+import { readFileSync, existsSync, readdirSync } from "node:fs"
 import { join, resolve, dirname, relative } from "node:path"
 import { fileURLToPath } from "node:url"
 import { createRequire } from "node:module"
 import { spawnSync } from "node:child_process"
 
 /** The kit these scripts belong to. A repo may not claim a newer one. */
-export const KIT_VERSION = "0.45.0"
+export const KIT_VERSION = "0.53.0"
 const SCHEMA = "ttt-ds/1"
 const PROFILE = "shadcn"
 
@@ -270,6 +270,10 @@ const CONFIG_SCHEMA = {
   framework: { required: false, check: (v) => v in FRAMEWORKS ? null : v === "next" ? 'Next.js is no longer supported (dropped in kit 0.30.0): the kit supports "vite"' : '"vite", the only framework the kit supports' },
   contrast: { required: false, check: (v) => isObject(v) ? null : 'an object: { "intentional": [{ "foreground", "background", "themes"?, "exempt", "reason" }], "pairs"?: [{ "foreground", "background", "min", "why" }], "charts"?: "labelled" }' },
   usingInCode: { required: false, check: (v) => isObject(v) ? null : 'an object: { "notes": ["…"] }' },
+  // The icon set the components draw with (since kit 0.46.0). Absent: lucide, the kit's own.
+  icons: { required: false, check: (v) => isObject(v) ? null : 'an object: { "library": "material-symbols", "style": "rounded", "weight": 400, "fill": false }, or leave it out for lucide' },
+  // The folder the system's logo files live in (since kit 0.52.0): push uploads them to the design system's Logos group, which is read-only on its page.
+  logos: { required: false, check: (v) => typeof v === "string" && v.length > 0 && !v.startsWith("/") && !v.includes("..") ? null : 'a folder in the repo, e.g. "src/assets/logos"' },
   // Setup under way. "template": a starter template on the kit's default look,
   // not yet named for a project (/ds-setup start adopts it). "awaiting-design":
   // the start phase is done and the design phase hasn't created the design
@@ -350,6 +354,16 @@ function checkConfig(config, err, { placeholders = false, warn = () => {} } = {}
     if (config.contrast.charts !== undefined && config.contrast.charts !== "labelled")
       err("contrast.charts", `is ${JSON.stringify(config.contrast.charts)}`, '"labelled" when every chart labels its series directly (the chart-series pairs are then waived), or leave it out')
     for (const key of Object.keys(config.contrast)) if (!["intentional", "pairs", "charts"].includes(key)) err(`contrast.${key}`, "isn't a key this kit knows", 'the keys are "intentional", "pairs" and "charts"')
+  }
+  if (isObject(config.icons)) {
+    const { library, style, weight, fill } = config.icons
+    if (!ICON_LIBRARIES.includes(library)) err("icons.library", `is ${JSON.stringify(library)}`, `one of ${ICON_LIBRARIES.map((l) => `"${l}"`).join(", ")}`)
+    if (library === "material-symbols") {
+      if (style !== undefined && !ICON_STYLES.includes(style)) err("icons.style", `is ${JSON.stringify(style)}`, `one of ${ICON_STYLES.map((l) => `"${l}"`).join(", ")} (default "rounded")`)
+      if (weight !== undefined && !ICON_WEIGHTS.includes(weight)) err("icons.weight", `is ${JSON.stringify(weight)}`, `one of ${ICON_WEIGHTS.join(", ")} (default 400): the package @material-symbols/svg-<weight>`)
+      if (fill !== undefined && typeof fill !== "boolean") err("icons.fill", `is ${JSON.stringify(fill)}`, "true for filled icons, false (the default) for outlines")
+    }
+    for (const key of Object.keys(config.icons)) if (!["library", "style", "weight", "fill"].includes(key)) err(`icons.${key}`, "isn't a key this kit knows", 'the keys are "library", "style", "weight" and "fill"')
   }
   if (isObject(config.usingInCode)) {
     const notes = config.usingInCode.notes ?? []
@@ -476,10 +490,36 @@ export function validate(repo, { preflight = false, testedRange, system, tokens:
     }
   }
 
+  // ---- icons: a Material Symbols system draws no lucide icon -----------------------
+  // Only once the set itself is valid: a bad weight already has its error, and names no package to look for.
+  if (isObject(config.icons) && config.icons.library === "material-symbols" && !preflight && !errors.some((e) => e.field.startsWith("icons.")))
+    checkIcons(repo, config.icons, ui, err)
+
   // ---- pre-flight: installed versions vs the tested range --------------------------
   if (preflight) checkTestedRange(repo, testedRange, err, config.framework, warn, notes)
 
   return { errors, warnings, notes }
+}
+
+/** The icon sets the kit's components can draw with: lucide (the kit's own) and Material Symbols, through SVGR. */
+export const ICON_LIBRARIES = ["lucide", "material-symbols"]
+const ICON_STYLES = ["outlined", "rounded", "sharp"]
+const ICON_WEIGHTS = [100, 200, 300, 400, 500, 600, 700]
+
+/**
+ * A Material Symbols system's wiring: its package and SVGR installed, and no component still importing lucide
+ * (a kit file copied or added without the kit's icon rewrite, kit/tools/ds-icons.mjs).
+ */
+function checkIcons(repo, icons, ui, err) {
+  const pkg = `@material-symbols/svg-${icons.weight ?? 400}`
+  for (const name of [pkg, "vite-plugin-svgr"])
+    if (!installedVersion(repo, name)) err(`icons`, `say Material Symbols, and ${name} isn't installed`, `install it (Setup's code.md §4, "Icons"), or set icons.library to "lucide"`)
+  if (!ui || !existsSync(ui)) return
+  for (const name of readdirSync(ui)) {
+    if (!/\.tsx?$/.test(name) || /\.test\.tsx?$/.test(name)) continue
+    if (/from\s*["']lucide-react["']/.test(readFileSync(join(ui, name), "utf8")))
+      err(`${relative(repo, join(ui, name))}`, "imports lucide-react in a Material Symbols system", `rewrite its icons: node <plugin>/kit/tools/ds-icons.mjs rewrite --file ${relative(repo, join(ui, name))} --write (an icon the kit doesn't map: pick one at fonts.google.com/icons, then add --map <lucide>=<material>)`)
+  }
 }
 
 function validateTokens(tokens, file, err, warn) {

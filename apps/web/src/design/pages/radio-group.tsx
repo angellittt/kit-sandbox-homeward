@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the RadioGroup page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the RadioGroup page
 import {
   Field,
   FieldLabel,

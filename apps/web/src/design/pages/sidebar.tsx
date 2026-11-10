@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the Sidebar page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the Sidebar page
 import { House, Settings, Users } from "lucide-react";
 import {
   Sidebar,
@@ -38,20 +38,20 @@ export const SidebarPreview = () => {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton isActive>
-                      <House size={16} />
+                      <House width={16} height={16} />
                       <span>Overview</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton>
-                      <Users size={16} />
+                      <Users width={16} height={16} />
                       <span>Team</span>
                     </SidebarMenuButton>
                     <SidebarMenuBadge>3</SidebarMenuBadge>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton>
-                      <Settings size={16} />
+                      <Settings width={16} height={16} />
                       <span>Settings</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

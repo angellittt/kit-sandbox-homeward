@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the Avatar page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the Avatar page
 import {
   Avatar,
   AvatarBadge,

@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the Badge page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the Badge page
 import { Badge } from "@/components/ui/badge";
 import { Labelled } from "../labels";
 

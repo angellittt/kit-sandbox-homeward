@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the Empty page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the Empty page
 import { Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +18,7 @@ export const EmptyPreview = () => {
       <Empty style={{ maxWidth: 420 }}>
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <Inbox size={16} />
+            <Inbox width={16} height={16} />
           </EmptyMedia>
           <EmptyTitle>No invoices match that filter</EmptyTitle>
           <EmptyDescription>

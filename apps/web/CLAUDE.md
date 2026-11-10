@@ -1,4 +1,4 @@
-<!-- design-system-kit 0.45.0 · profile shadcn · wiring: CLAUDE.md design-system section -->
+<!-- design-system-kit 0.53.0 · profile shadcn · wiring: CLAUDE.md design-system section -->
 
 # Design system
 
@@ -54,6 +54,80 @@ None yet.
 - **Generated, never hand-edited:** `src/styles/ds-tokens.css` and `.ttt/` (the token
   snapshot, the System snapshot, the config). A token change is a design
   change: log a deviation rather than editing a value here.
+
+## Building a screen from a design
+
+A designer hands over a screen as a Figma frame or as an artboard on a
+claude.ai Design canvas. Either is a reference for layout, content and
+states, not code to keep: both come out as generic markup with raw values.
+A screen is app code: the Usage rules and Patterns apply as to any other.
+When a designer reviewed the screen against the system first (`/ds-change`'s
+screen review), its ticket has a **Design handoff · design-system-kit**
+section: the app components to build (options, states, rules, what each is
+built from), each screen's build notes, what **needs a dev** (behaviour and
+data the drawing can't show), open questions, and the design PR the screen
+waits on. Read it before the design, and don't build on a change that PR
+makes until it has merged.
+
+**Reading a Figma frame.** `get_design_context` for the node, and
+`get_screenshot` to compare against. The frame is built from the design
+system's Figma library, which the kit generates from this code, so its names
+map straight back: an instance is a component, a variable's code syntax is
+`var(--<token name>)`, a text style is `Text/<style>`. Its icons come from
+the icon set's own Figma library (Material Symbols', lucide's), not the
+system's. Never use the MCP's asset URLs for an icon or the logo. The logo
+is the repo's own file, the one Setup and Sync copy from the design
+system's Logos; none in the repo is a question for the designer.
+
+**Reading a Design canvas.** Open its link with the Artifact tool (`read`;
+never a web fetch): `project/canvas.json` lists the artboards (`title`,
+pages, order), each one a `project/<name>.dc.html`. An artboard is HTML
+with inline styles. The design system's components appear as
+`<x-import component-from-global-scope="<Namespace>.<Comp>">` when the
+canvas installed the system's bundle: the name is the component and the
+attributes are its props, as in app code (a trigger's `button="outline"` is
+`render={<Button variant="outline" />}`; `<Namespace>.Icon name="…"` is the
+set's icon of that name). Without it they appear as markup. Its `data-props` editors (a Status enum, a count) are the
+states to build; `sc-if`, `sc-for` and `renderVals()` are sample data and
+conditions, which become the app's data. `project/ds/<folder>/tokens.json`
+is a copy of the system from `copiedAt`, and may lag: this repo's token
+file wins.
+
+Then, from either:
+
+1. **Components, not markup.** A library instance, or markup that draws one
+   (a button, a pill, tabs, a field), is the stock component from
+   `@/components/ui`: same name in Figma (a part `Tabs/Trigger` is
+   `TabsTrigger`), same look on a canvas (a status pill is `Badge` with its
+   `tone`). Figma's variant properties are its props, except `State`: hover
+   and focus come with the component, and disabled or invalid is the prop or
+   attribute its docs give. Never rebuild one from divs.
+2. **Tokens, not values.** A semantic token, as a variable
+   (`var(--label-strong)`), is the utility of that name from "Using in code"
+   (`text-label-strong`; `var(--space-4)` is `p-4`); never the variable in
+   an arbitrary class. A primitive (`var(--neutral-950)`), a name the system
+   doesn't have, or a hex value is the semantic token for that role (text,
+   fill, line) whose value matches in this repo's token file: primitives are
+   never utilities. Type is a `type-<style>` class, whatever
+   font the design loads. No match is a question, not `bg-[#…]` or
+   `p-[18px]`: ask, or log a token request. A design's theme or mode is the
+   one it was drawn in: the same utilities serve every theme the app has
+   (Wireframe is a design mode, not one of them).
+3. **Icons from the icon set, by name.** Import the set's icon of that name
+   from the icon package the kit's components import from: `lucide-react`,
+   or `@material-symbols/svg-<weight>` when the config's `icons` names
+   Material Symbols. In Figma it's an instance from the set's library, named
+   there (an older library's `Icon/<name>` names one too); on a canvas,
+   `<Namespace>.Icon` names it, and an inline SVG is named by its drawing (a
+   lucide path is that lucide icon).
+   Its colour is the text token where it sits, not the fill it came with. A
+   component's own glyphs (a Select's chevron) come with the component.
+   `Icon/placeholder` is a slot the designer hasn't filled, and an icon from
+   another set isn't this system's: ask, don't guess. Never paste a design's
+   SVG (the logo included) and don't add an icon package. Content images (a
+   photo, an illustration) may be downloaded into the app's assets.
+4. **Check it** in the running app against the screenshot or the artboard,
+   in each theme.
 
 ## Locale defaults
 

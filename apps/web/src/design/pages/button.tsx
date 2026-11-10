@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the Button page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the Button page
 import { Copy, Ellipsis, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -56,22 +56,22 @@ export const ButtonPreview = () => {
       <div className="row">
         <Labelled label="icon-xs">
           <Button size="icon-xs" variant="outline" aria-label="Add">
-            <Plus size={16} />
+            <Plus width={16} height={16} />
           </Button>
         </Labelled>
         <Labelled label="icon-sm">
           <Button size="icon-sm" variant="outline" aria-label="Copy">
-            <Copy size={16} />
+            <Copy width={16} height={16} />
           </Button>
         </Labelled>
         <Labelled label="icon">
           <Button size="icon" variant="outline" aria-label="Search">
-            <Search size={16} />
+            <Search width={16} height={16} />
           </Button>
         </Labelled>
         <Labelled label="icon-lg">
           <Button size="icon-lg" variant="ghost" aria-label="More">
-            <Ellipsis size={16} />
+            <Ellipsis width={16} height={16} />
           </Button>
         </Labelled>
       </div>

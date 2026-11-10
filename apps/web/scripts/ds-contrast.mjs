@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// design-system-kit 0.45.0 · profile shadcn · kit file — fix it in the kit, not per client
+// design-system-kit 0.53.0 · profile shadcn · kit file — fix it in the kit, not per client
 /**
  * ds-contrast.mjs — check every contrast requirement in every theme.
  *

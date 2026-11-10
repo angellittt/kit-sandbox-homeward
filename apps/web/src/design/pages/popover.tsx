@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the Popover page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the Popover page
 import { Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,7 +42,7 @@ export const PopoverPreview = () => {
               />
               <InputGroupAddon align="inline-end">
                 <InputGroupButton size="icon-xs" aria-label="Copy link">
-                  <Copy size={16} />
+                  <Copy width={16} height={16} />
                 </InputGroupButton>
               </InputGroupAddon>
             </InputGroup>

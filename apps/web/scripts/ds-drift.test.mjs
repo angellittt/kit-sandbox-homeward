@@ -1,5 +1,5 @@
 // @vitest-environment node
-// design-system-kit 0.45.0 · profile shadcn · wiring: the repo against its design system
+// design-system-kit 0.53.0 · profile shadcn · wiring: the repo against its design system
 //
 // Setup puts this beside the one kit script a repo carries, scripts/ds-validate.mjs
 // (with the contrast check it runs), so the repo's own test run (and so its CI)

@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the Alert page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the Alert page
 import { CircleAlert, Info } from "lucide-react";
 import {
   Alert,
@@ -14,7 +14,7 @@ export const AlertPreview = () => {
     <div className="col">
       <Labelled label="default" block>
         <Alert>
-          <Info size={16} />
+          <Info width={16} height={16} />
           <AlertTitle>Billing moves to monthly in April</AlertTitle>
           <AlertDescription>
             Nothing to do — your plan and price stay the same.
@@ -23,7 +23,7 @@ export const AlertPreview = () => {
       </Labelled>
       <Labelled label="destructive" block>
         <Alert variant="destructive">
-          <CircleAlert size={16} />
+          <CircleAlert width={16} height={16} />
           <AlertTitle>Payment failed</AlertTitle>
           <AlertDescription>Use a card that has not expired.</AlertDescription>
         </Alert>
