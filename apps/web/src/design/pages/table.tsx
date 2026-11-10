@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the Table page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the Table page
 import { Badge } from "@/components/ui/badge";
 import {
   Table,

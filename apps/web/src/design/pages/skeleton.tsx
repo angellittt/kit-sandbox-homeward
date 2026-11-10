@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the Skeleton page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the Skeleton page
 import { Skeleton } from "@/components/ui/skeleton";
 import { Property } from "../labels";
 

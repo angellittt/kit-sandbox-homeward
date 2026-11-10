@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the ButtonGroup page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the ButtonGroup page
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,7 +31,7 @@ export const ButtonGroupPreview = () => {
                 />
               }
             >
-              <ChevronDown size={16} />
+              <ChevronDown width={16} height={16} />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem>Schedule send</DropdownMenuItem>
@@ -45,10 +45,10 @@ export const ButtonGroupPreview = () => {
           <ButtonGroup aria-label="Toolbar">
             <ButtonGroup>
               <Button variant="outline" size="icon" aria-label="Previous">
-                <ChevronLeft size={16} />
+                <ChevronLeft width={16} height={16} />
               </Button>
               <Button variant="outline" size="icon" aria-label="Next">
-                <ChevronRight size={16} />
+                <ChevronRight width={16} height={16} />
               </Button>
             </ButtonGroup>
             <ButtonGroup>
@@ -62,7 +62,7 @@ export const ButtonGroupPreview = () => {
             <Button variant="secondary">Copy</Button>
             <ButtonGroupSeparator />
             <Button variant="secondary" size="icon" aria-label="Copy options">
-              <ChevronDown size={16} />
+              <ChevronDown width={16} height={16} />
             </Button>
           </ButtonGroup>
         </Labelled>

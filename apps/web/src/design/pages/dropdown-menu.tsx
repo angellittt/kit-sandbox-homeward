@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the DropdownMenu page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the DropdownMenu page
 import { Copy, Ellipsis } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +29,7 @@ export const DropdownMenuPreview = () => {
               />
             }
           >
-            <Ellipsis size={16} />
+            <Ellipsis width={16} height={16} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             <DropdownMenuGroup>
@@ -39,7 +39,7 @@ export const DropdownMenuPreview = () => {
                 <DropdownMenuShortcut>R</DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Copy size={16} />
+                <Copy width={16} height={16} />
                 Duplicate
                 <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>
               </DropdownMenuItem>

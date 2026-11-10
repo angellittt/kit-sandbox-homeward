@@ -1,4 +1,4 @@
-# design-system-kit 0.45.0 · profile shadcn · wiring (CI): GitHub Actions, design branches merged
+# design-system-kit 0.53.0 · profile shadcn · wiring (CI): GitHub Actions, design branches merged
 #
 # Setup copies this to .github/workflows/design-merged.yml at the repo root,
 # beside design.yml. One job, when a designer's design/* PR merges into

@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the InputGroup page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the InputGroup page
 import { useState } from "react";
 import { Search, X } from "lucide-react";
 import {
@@ -19,7 +19,7 @@ export const InputGroupPreview = () => {
       <Labelled label="icon and button" block>
         <InputGroup>
           <InputGroupAddon>
-            <Search size={16} />
+            <Search width={16} height={16} />
           </InputGroupAddon>
           <InputGroupInput
             placeholder="Search boards"
@@ -38,7 +38,7 @@ export const InputGroupPreview = () => {
                   setQ("");
                 }}
               >
-                <X size={16} />
+                <X width={16} height={16} />
               </InputGroupButton>
             </InputGroupAddon>
           ) : null}

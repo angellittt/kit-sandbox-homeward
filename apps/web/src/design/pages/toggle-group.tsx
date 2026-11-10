@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the ToggleGroup page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the ToggleGroup page
 import { useState } from "react";
 import { Bold, Italic, LayoutGrid, List, Underline } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -21,10 +21,10 @@ export const ToggleGroupPreview = () => {
           aria-label="View"
         >
           <ToggleGroupItem value="list" aria-label="List">
-            <List size={16} />
+            <List width={16} height={16} />
           </ToggleGroupItem>
           <ToggleGroupItem value="grid" aria-label="Grid">
-            <LayoutGrid size={16} />
+            <LayoutGrid width={16} height={16} />
           </ToggleGroupItem>
         </ToggleGroup>
       </Labelled>
@@ -36,13 +36,13 @@ export const ToggleGroupPreview = () => {
           aria-label="Formatting"
         >
           <ToggleGroupItem value="bold" aria-label="Bold">
-            <Bold size={16} />
+            <Bold width={16} height={16} />
           </ToggleGroupItem>
           <ToggleGroupItem value="italic" aria-label="Italic">
-            <Italic size={16} />
+            <Italic width={16} height={16} />
           </ToggleGroupItem>
           <ToggleGroupItem value="underline" aria-label="Underline">
-            <Underline size={16} />
+            <Underline width={16} height={16} />
           </ToggleGroupItem>
         </ToggleGroup>
       </Labelled>

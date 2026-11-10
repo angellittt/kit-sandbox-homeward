@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · wiring (Vite): design build
+// design-system-kit 0.53.0 · profile shadcn · wiring (Vite): design build
 /**
  * The app's own Vite config with the design entry (`design.html`) as a second
  * page, for a hosted preview deploy: `build:design` runs `vite build --config

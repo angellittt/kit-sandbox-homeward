@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the labels
+// design-system-kit 0.53.0 · profile shadcn · design entry: the labels
 //
 // What the pages name for a designer: the property a row shows (Property:
 // "Variant", "Size") and each example's value or state under it (Labelled:

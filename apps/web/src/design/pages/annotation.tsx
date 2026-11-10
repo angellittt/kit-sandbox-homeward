@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the Annotation page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the Annotation page
 import { Button } from "@/components/ui/button";
 import { Annotation, AnnotationPin } from "../wireframe/annotation";
 import { Labelled } from "../labels";

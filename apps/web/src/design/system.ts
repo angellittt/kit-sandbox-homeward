@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the system's data
+// design-system-kit 0.53.0 · profile shadcn · design entry: the system's data
 //
 // What the pages say about the design system, read from the app's own files
 // so it is always the code's: the tokens (.ttt/tokens.json, the usage notes

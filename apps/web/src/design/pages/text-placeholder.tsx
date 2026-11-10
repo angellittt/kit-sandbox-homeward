@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the TextPlaceholder page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the TextPlaceholder page
 import { TextPlaceholder } from "../wireframe/text-placeholder";
 import { Labelled } from "../labels";
 

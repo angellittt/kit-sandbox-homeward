@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the Spinner page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the Spinner page
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Labelled } from "../labels";

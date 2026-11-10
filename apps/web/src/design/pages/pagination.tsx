@@ -1,4 +1,4 @@
-// design-system-kit 0.45.0 · profile shadcn · design entry: the Pagination page
+// design-system-kit 0.53.0 · profile shadcn · design entry: the Pagination page
 import { useState, type MouseEvent } from "react";
 import {
   Pagination,
